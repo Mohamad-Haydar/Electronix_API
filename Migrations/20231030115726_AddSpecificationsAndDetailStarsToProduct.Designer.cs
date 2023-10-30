@@ -12,8 +12,8 @@ using Web_API.Data;
 namespace Web_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231027141203_FirstMigration")]
-    partial class FirstMigration
+    [Migration("20231030115726_AddSpecificationsAndDetailStarsToProduct")]
+    partial class AddSpecificationsAndDetailStarsToProduct
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,6 +59,23 @@ namespace Web_API.Migrations
                     b.ToTable("Manufacturers");
                 });
 
+            modelBuilder.Entity("Web_API.Models.Option", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("OptionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Options");
+                });
+
             modelBuilder.Entity("Web_API.Models.Product", b =>
                 {
                     b.Property<string>("Id")
@@ -94,6 +111,25 @@ namespace Web_API.Migrations
                     b.Property<double>("Review")
                         .HasColumnType("float");
 
+                    b.Property<string>("Specification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Stars1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stars2")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stars3")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stars4")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Stars5")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -107,13 +143,61 @@ namespace Web_API.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Web_API.Models.ProductVariant", b =>
+            modelBuilder.Entity("Web_API.Models.ProductOption", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("OptionId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OptionId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductOptions");
+                });
+
+            modelBuilder.Entity("Web_API.Models.ProductOptionVariant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ProductOptionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProductVariantId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductOptionId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("ProductOptionVariantS");
+                });
+
+            modelBuilder.Entity("Web_API.Models.ProductVariant", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -301,127 +385,6 @@ namespace Web_API.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("Web_API.Models.Variants.Color", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ColorName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Colors");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.MemoryStorage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Memory")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Storage")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MemoryStorages");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.PVColor", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ColorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ColorId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("PVColors");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.PVMemoryStorage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MemoryStorageId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemoryStorageId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("PVMemoryStorages");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.PVSize", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SizeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("SizeId");
-
-                    b.ToTable("PVSizes");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.Size", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("SizeNumber")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sizes");
-                });
-
             modelBuilder.Entity("Web_API.Models.Product", b =>
                 {
                     b.HasOne("Web_API.Models.Category", "Category")
@@ -439,6 +402,44 @@ namespace Web_API.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Manufacturer");
+                });
+
+            modelBuilder.Entity("Web_API.Models.ProductOption", b =>
+                {
+                    b.HasOne("Web_API.Models.Option", "Option")
+                        .WithMany("ProductOptions")
+                        .HasForeignKey("OptionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Web_API.Models.Product", "Product")
+                        .WithMany("ProductOptions")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Option");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Web_API.Models.ProductOptionVariant", b =>
+                {
+                    b.HasOne("Web_API.Models.ProductOption", "ProductOption")
+                        .WithMany("ProductOptionVariants")
+                        .HasForeignKey("ProductOptionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Web_API.Models.ProductVariant", "ProductVariant")
+                        .WithMany("ProductOptionVariants")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductOption");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("Web_API.Models.ProductVariant", b =>
@@ -485,7 +486,7 @@ namespace Web_API.Migrations
                     b.HasOne("Web_API.Models.User", "User")
                         .WithMany("UserProductReviews")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -512,63 +513,6 @@ namespace Web_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_API.Models.Variants.PVColor", b =>
-                {
-                    b.HasOne("Web_API.Models.Variants.Color", "Color")
-                        .WithMany("PVColors")
-                        .HasForeignKey("ColorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Web_API.Models.ProductVariant", "ProductVariant")
-                        .WithMany("PVColors")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Color");
-
-                    b.Navigation("ProductVariant");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.PVMemoryStorage", b =>
-                {
-                    b.HasOne("Web_API.Models.Variants.MemoryStorage", "MemoryStorage")
-                        .WithMany("PVMemoryStorages")
-                        .HasForeignKey("MemoryStorageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Web_API.Models.ProductVariant", "ProductVariant")
-                        .WithMany("PVMemoryStorages")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MemoryStorage");
-
-                    b.Navigation("ProductVariant");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.PVSize", b =>
-                {
-                    b.HasOne("Web_API.Models.ProductVariant", "ProductVariant")
-                        .WithMany("PVSizes")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Web_API.Models.Variants.Size", "Size")
-                        .WithMany("PVSizes")
-                        .HasForeignKey("SizeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("Size");
-                });
-
             modelBuilder.Entity("Web_API.Models.Category", b =>
                 {
                     b.Navigation("Products");
@@ -579,20 +523,28 @@ namespace Web_API.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Web_API.Models.Option", b =>
+                {
+                    b.Navigation("ProductOptions");
+                });
+
             modelBuilder.Entity("Web_API.Models.Product", b =>
                 {
+                    b.Navigation("ProductOptions");
+
                     b.Navigation("ProductVariants");
 
                     b.Navigation("UserProductReviews");
                 });
 
+            modelBuilder.Entity("Web_API.Models.ProductOption", b =>
+                {
+                    b.Navigation("ProductOptionVariants");
+                });
+
             modelBuilder.Entity("Web_API.Models.ProductVariant", b =>
                 {
-                    b.Navigation("PVColors");
-
-                    b.Navigation("PVMemoryStorages");
-
-                    b.Navigation("PVSizes");
+                    b.Navigation("ProductOptionVariants");
                 });
 
             modelBuilder.Entity("Web_API.Models.Role", b =>
@@ -609,21 +561,6 @@ namespace Web_API.Migrations
                     b.Navigation("UserProductReviews");
 
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.Color", b =>
-                {
-                    b.Navigation("PVColors");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.MemoryStorage", b =>
-                {
-                    b.Navigation("PVMemoryStorages");
-                });
-
-            modelBuilder.Entity("Web_API.Models.Variants.Size", b =>
-                {
-                    b.Navigation("PVSizes");
                 });
 #pragma warning restore 612, 618
         }

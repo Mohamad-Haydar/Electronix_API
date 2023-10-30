@@ -7,6 +7,7 @@ namespace Web_API.Models.ViewModels
         [Required]
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Specification { get; set; }
         [Required]
         public int Barcode { get; set; }
         public double Discount { get; set; }

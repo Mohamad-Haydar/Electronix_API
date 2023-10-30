@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_API.Data;
 
@@ -11,9 +12,11 @@ using Web_API.Data;
 namespace Web_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231029083535_FirstMigration")]
+    partial class FirstMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,25 +110,6 @@ namespace Web_API.Migrations
 
                     b.Property<double>("Review")
                         .HasColumnType("float");
-
-                    b.Property<string>("Specification")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Stars1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Stars2")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Stars3")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Stars4")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Stars5")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()

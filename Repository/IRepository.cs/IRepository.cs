@@ -7,6 +7,8 @@ namespace Web_API.Repository.IRepository
     {
         public Task<IEnumerable<T>> GetAll();
         Task<T> Get(Expression<Func<T, bool>> filter);
+        public Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter);
+
         Task<bool> Add(T entity);
         Task<bool> Update(T entity);
         Task<bool> Remove(int id);

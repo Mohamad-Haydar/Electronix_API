@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Web_API.Models;
-using Web_API.Models.Variants;
-using Web_API.Models.ViewModels;
 using Web_API.Repository.IRepository;
 
 namespace Web_API.Controllers

@@ -24,11 +24,17 @@ namespace Web_API.Repository
             return true;
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> filter)
+        public virtual async Task<T> Get(Expression<Func<T, bool>> filter)
         {
             IQueryable<T> query = dbSet;
             query = query.Where(filter);
             return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter)
+        {
+            var list = await dbSet.Where(filter).ToListAsync();
+            return list;
         }
 
         public async Task<IEnumerable<T>> GetAll()

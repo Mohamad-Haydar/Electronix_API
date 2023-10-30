@@ -84,3 +84,5 @@
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/obj/Debug/net7.0/Web_API.pdb
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/obj/Debug/net7.0/Web_API.genruntimeconfig.cache
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/obj/Debug/net7.0/ref/Web_API.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/AutoMapper.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll

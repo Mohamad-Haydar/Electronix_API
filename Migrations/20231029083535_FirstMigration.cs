@@ -25,19 +25,6 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Colors",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ColorName = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Colors", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Manufacturers",
                 columns: table => new
                 {
@@ -51,17 +38,16 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MemoryStorages",
+                name: "Options",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Memory = table.Column<int>(type: "int", nullable: false),
-                    Storage = table.Column<int>(type: "int", nullable: false)
+                    OptionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MemoryStorages", x => x.Id);
+                    table.PrimaryKey("PK_Options", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,19 +61,6 @@ namespace Web_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Sizes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SizeNumber = table.Column<double>(type: "float", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sizes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -213,11 +186,34 @@ namespace Web_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductOptions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProductId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OptionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductOptions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductOptions_Options_OptionId",
+                        column: x => x.OptionId,
+                        principalTable: "Options",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductOptions_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductVariants",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProductId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     sku = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Qty = table.Column<int>(type: "int", nullable: false),
@@ -257,87 +253,54 @@ namespace Web_API.Migrations
                         name: "FK_UserProductReviews_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "PVColors",
+                name: "ProductOptionVariantS",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
-                    ColorId = table.Column<int>(type: "int", nullable: false)
+                    ProductOptionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProductVariantId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PVColors", x => x.Id);
+                    table.PrimaryKey("PK_ProductOptionVariantS", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PVColors_Colors_ColorId",
-                        column: x => x.ColorId,
-                        principalTable: "Colors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_ProductOptionVariantS_ProductOptions_ProductOptionId",
+                        column: x => x.ProductOptionId,
+                        principalTable: "ProductOptions",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PVColors_ProductVariants_ProductVariantId",
+                        name: "FK_ProductOptionVariantS_ProductVariants_ProductVariantId",
                         column: x => x.ProductVariantId,
                         principalTable: "ProductVariants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "PVMemoryStorages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
-                    MemoryStorageId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PVMemoryStorages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PVMemoryStorages_MemoryStorages_MemoryStorageId",
-                        column: x => x.MemoryStorageId,
-                        principalTable: "MemoryStorages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PVMemoryStorages_ProductVariants_ProductVariantId",
-                        column: x => x.ProductVariantId,
-                        principalTable: "ProductVariants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOptions_OptionId",
+                table: "ProductOptions",
+                column: "OptionId");
 
-            migrationBuilder.CreateTable(
-                name: "PVSizes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
-                    SizeId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PVSizes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PVSizes_ProductVariants_ProductVariantId",
-                        column: x => x.ProductVariantId,
-                        principalTable: "ProductVariants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PVSizes_Sizes_SizeId",
-                        column: x => x.SizeId,
-                        principalTable: "Sizes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOptions_ProductId",
+                table: "ProductOptions",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOptionVariantS_ProductOptionId",
+                table: "ProductOptionVariantS",
+                column: "ProductOptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOptionVariantS_ProductVariantId",
+                table: "ProductOptionVariantS",
+                column: "ProductVariantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
@@ -353,36 +316,6 @@ namespace Web_API.Migrations
                 name: "IX_ProductVariants_ProductId",
                 table: "ProductVariants",
                 column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVColors_ColorId",
-                table: "PVColors",
-                column: "ColorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVColors_ProductVariantId",
-                table: "PVColors",
-                column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVMemoryStorages_MemoryStorageId",
-                table: "PVMemoryStorages",
-                column: "MemoryStorageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVMemoryStorages_ProductVariantId",
-                table: "PVMemoryStorages",
-                column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVSizes_ProductVariantId",
-                table: "PVSizes",
-                column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PVSizes_SizeId",
-                table: "PVSizes",
-                column: "SizeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
@@ -419,13 +352,7 @@ namespace Web_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PVColors");
-
-            migrationBuilder.DropTable(
-                name: "PVMemoryStorages");
-
-            migrationBuilder.DropTable(
-                name: "PVSizes");
+                name: "ProductOptionVariantS");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims");
@@ -440,22 +367,19 @@ namespace Web_API.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
-                name: "Colors");
-
-            migrationBuilder.DropTable(
-                name: "MemoryStorages");
+                name: "ProductOptions");
 
             migrationBuilder.DropTable(
                 name: "ProductVariants");
-
-            migrationBuilder.DropTable(
-                name: "Sizes");
 
             migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Options");
 
             migrationBuilder.DropTable(
                 name: "Products");
