@@ -14,6 +14,8 @@ namespace Web_API.Repository
         public IOptionRepository Option { get; private set; }
         public IProductOptionRepository ProductOption { get; private set; }
         public IProductOptionVariantRepository ProductOptionVariant { get; private set; }
+        public IUserRepository UserRepository { get; private set; }
+        public IUserProductReviewRepository UserProductReview { get; private set; }
         public UnitOfWork(ApplicationDbContext db, ILogger<UnitOfWork> logger)
         {
             _db = db;
@@ -25,6 +27,8 @@ namespace Web_API.Repository
             Option = new OptionRepository(_db, _logger);
             ProductOption = new ProductOptionRepository(_db, _logger);
             ProductOptionVariant = new ProductOptionVariantRepository(_db, _logger);
+            UserRepository = new UserRepository(_db, _logger);
+            UserProductReview = new UserProductReviewRepository(_db, _logger);
         }
 
         public void Save()

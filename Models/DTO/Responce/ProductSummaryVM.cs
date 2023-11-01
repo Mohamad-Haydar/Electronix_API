@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_API.Models.ViewModels
+namespace Web_API.Models.DTO.Responce
 {
     public class ProductSummaryVM
     {

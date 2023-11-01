@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace Web_API.Models.ViewModels
+namespace Web_API.Models.DTO.Responce
 {
-    public class ProductVariantsVM
+    public class ProductVariantDetailVM
     {
         [ValidateNever]
         public string Id { get; set; }
@@ -14,6 +14,6 @@ namespace Web_API.Models.ViewModels
         [Required]
         public double Price { get; set; }
         [Required]
-        public Dictionary<int, string> optionsValues { get; set; }
+        public Dictionary<string, string> optionsValues { get; set; }
     }
 }

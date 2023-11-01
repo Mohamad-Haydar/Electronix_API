@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_API.Data;
 
@@ -11,9 +12,11 @@ using Web_API.Data;
 namespace Web_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231031072146_FirstMigration")]
+    partial class FirstMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -350,46 +353,6 @@ namespace Web_API.Migrations
                     b.ToTable("ProductVariants");
                 });
 
-            modelBuilder.Entity("Web_API.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("JwtId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("RefreshTokens");
-                });
-
             modelBuilder.Entity("Web_API.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -397,10 +360,6 @@ namespace Web_API.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -606,17 +565,6 @@ namespace Web_API.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Web_API.Models.RefreshToken", b =>
-                {
-                    b.HasOne("Web_API.Models.User", "User")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("Web_API.Models.RefreshToken", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Web_API.Models.UserProductReview", b =>
                 {
                     b.HasOne("Web_API.Models.Product", "Product")
@@ -672,9 +620,6 @@ namespace Web_API.Migrations
 
             modelBuilder.Entity("Web_API.Models.User", b =>
                 {
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
-
                     b.Navigation("UserProductReviews");
                 });
 #pragma warning restore 612, 618

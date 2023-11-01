@@ -9,6 +9,8 @@ namespace Web_API.Repository.IRepository
         IOptionRepository Option { get; }
         IProductOptionRepository ProductOption { get; }
         IProductOptionVariantRepository ProductOptionVariant { get; }
+        IUserRepository UserRepository { get; }
+        IUserProductReviewRepository UserProductReview { get; }
         void Save();
     }
 }

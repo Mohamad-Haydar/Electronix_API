@@ -1,18 +1,15 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Web_API.Models;
 namespace Web_API.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
         }
         public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<RoleClaim> RoleClaims { get; set; }
-        public DbSet<UserClaim> UserClaims { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<UserProductReview> UserProductReviews { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -21,14 +18,14 @@ namespace Web_API.Data
         public DbSet<Option> Options { get; set; }
         public DbSet<ProductOption> ProductOptions { get; set; }
         public DbSet<ProductOptionVariant> ProductOptionVariantS { get; set; }
-
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<User>().HasKey(u => u.Id);
-            builder.Entity<Role>().HasKey(r => r.Id);
+            // builder.Entity<Role>().HasKey(r => r.Id);
             builder.Entity<Product>().HasKey(p => p.Id);
             builder.Entity<Category>().HasKey(c => c.Id);
             builder.Entity<Manufacturer>().HasKey(m => m.Id);
@@ -36,18 +33,7 @@ namespace Web_API.Data
             builder.Entity<Option>().HasKey(o => o.Id);
             builder.Entity<ProductOption>().HasKey(po => po.Id);
             builder.Entity<ProductOptionVariant>().HasKey(pov => pov.Id);
-
-
-
-            // user with role relation:  user role relation N-M
-            builder.Entity<UserRole>().HasKey(ur => ur.Id);
-            builder.Entity<UserRole>().HasOne(ur => ur.User).WithMany(u => u.UserRoles).HasForeignKey(ur => ur.UserId);
-            builder.Entity<UserRole>().HasOne(ur => ur.Role).WithMany(u => u.UserRoles).HasForeignKey(ur => ur.RoleId);
-
-            // User claim relation 1-N
-            builder.Entity<UserClaim>().HasOne(uc => uc.User).WithMany(u => u.UserClaims).HasForeignKey(uc => uc.UserId);
-            // Role claim relation 1-N
-            builder.Entity<RoleClaim>().HasOne(rc => rc.Role).WithMany(r => r.RoleClaims).HasForeignKey(rc => rc.RoleId);
+            builder.Entity<RefreshToken>().HasKey(rt => rt.Id);
 
             // user with product relation: user product review relation N-M
             builder.Entity<UserProductReview>().HasKey(upr => upr.Id);
@@ -72,6 +58,8 @@ namespace Web_API.Data
             builder.Entity<ProductOptionVariant>().HasOne(pov => pov.ProductVariant).WithMany(pv => pv.ProductOptionVariants).HasForeignKey(pov => pov.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             builder.Entity<ProductOptionVariant>().HasOne(pov => pov.ProductOption).WithMany(po => po.ProductOptionVariants).HasForeignKey(pov => pov.ProductOptionId).OnDelete(DeleteBehavior.NoAction);
 
+            // refresh token relation with the user
+            builder.Entity<User>().HasOne(u => u.RefreshToken).WithOne(rt => rt.User).HasForeignKey<RefreshToken>(rt => rt.UserId);
         }
 
     }

@@ -1,9 +1,13 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web_API.Models;
-using Web_API.Models.ViewModels;
+using Web_API.Models.DTO.Request;
+using Web_API.Models.DTO.Responce;
 using Web_API.Repository.IRepository;
 
 namespace Web_API.Controllers
@@ -45,7 +49,6 @@ namespace Web_API.Controllers
       return Ok(products);
     }
 
-
     [HttpGet("GetOneProduct")]
     public async Task<IActionResult> GetOneProduct(string id)
     {
@@ -69,7 +72,12 @@ namespace Web_API.Controllers
         NummberOfReview = product.NummberOfReview,
         Review = product.Review,
         Manufacturer = manufacturer.ManufacturerName,
-        Category = category.CategoryName
+        Category = category.CategoryName,
+        Stars5 = product.Stars5,
+        Stars4 = product.Stars4,
+        Stars3 = product.Stars3,
+        Stars2 = product.Stars2,
+        Stars1 = product.Stars1
       };
 
       List<ProductVariantDetailVM> productVariantVMs = new() { };
@@ -171,6 +179,63 @@ namespace Web_API.Controllers
 
       var json = JsonSerializer.Serialize(product, options);
 
+      return Ok();
+    }
+
+    [HttpPost("PostReview")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
+    public async Task<IActionResult> PostReview([FromBody] ReviewDTO ReviewDTO)
+    {
+      if (!ModelState.IsValid)
+      {
+        return BadRequest();
+      }
+      var product = await _unitOfWork.Product.Get(x => x.Id == ReviewDTO.ProductId);
+      if (product == null)
+      {
+        return BadRequest();
+      }
+      var oldUserReview = await _unitOfWork.UserProductReview.Get(x => x.UserId == ReviewDTO.UserId && x.ProductId == ReviewDTO.ProductId);
+
+      if (oldUserReview == null)
+      {
+        // we need to add a new review to this user
+        UserProductReview userProductReview = new()
+        {
+          UserId = ReviewDTO.UserId,
+          ProductId = ReviewDTO.ProductId,
+          Review = ReviewDTO.Review
+        };
+        await _unitOfWork.UserProductReview.Add(userProductReview);
+
+        PropertyInfo property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
+
+        int currentValue = (int)property.GetValue(product);
+        property.SetValue(product, currentValue + 1);
+
+        var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review) / (product.NummberOfReview + 1);
+        product.Review = newReview;
+        product.NummberOfReview++;
+      }
+      else
+      {
+        // we need to update the review of this user
+        // 1- substract one from the old review numbers
+        PropertyInfo property = product.GetType().GetProperty("Stars" + oldUserReview.Review);
+        int currentValue = (int)property.GetValue(product);
+        property.SetValue(product, currentValue - 1);
+
+        // 2- add one to this new review
+        property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
+        currentValue = (int)property.GetValue(product);
+        property.SetValue(product, currentValue + 1);
+
+        // 3- change the review of the product
+        var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review - oldUserReview.Review) / product.NummberOfReview;
+        product.Review = newReview;
+        oldUserReview.Review = ReviewDTO.Review;
+      }
+      _unitOfWork.Save();
       return Ok();
     }
 

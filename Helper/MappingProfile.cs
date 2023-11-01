@@ -1,6 +1,7 @@
 using AutoMapper;
 using Web_API.Models;
-using Web_API.Models.ViewModels;
+using Web_API.Models.DTO.Request;
+using Web_API.Models.DTO.Responce;
 
 namespace Web_API.Helper
 {
@@ -9,6 +10,7 @@ namespace Web_API.Helper
         public MappingProfile()
         {
             CreateMap<Product, ProductSummaryVM>();
+            CreateMap<User, RegisterVM>();
         }
     }
 }

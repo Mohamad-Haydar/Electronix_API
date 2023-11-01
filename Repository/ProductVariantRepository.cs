@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using Web_API.Data;
 using Web_API.Models;
 using Web_API.Repository.IRepository;

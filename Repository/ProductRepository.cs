@@ -1,12 +1,7 @@
-using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_API.Data;
 using Web_API.Models;
-using Web_API.Models.ViewModels;
 using Web_API.Repository.IRepository;
 
 namespace Web_API.Repository
