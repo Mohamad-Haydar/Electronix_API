@@ -9,7 +9,7 @@ namespace Web_API.Models.DTO.Request
         public string Description { get; set; }
         public string Specification { get; set; }
         [Required]
-        public int Barcode { get; set; }
+        public string Barcode { get; set; }
         public double Discount { get; set; }
         public string ImageUrl { get; set; }
         [Required]

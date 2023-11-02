@@ -11,7 +11,7 @@ namespace Web_API.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public string Specification { get; set; }
-        public int Barcode { get; set; }
+        public string Barcode { get; set; }
         public double Discount { get; set; }
         public string ImageUrl { get; set; }
         public int CategoryId { get; set; }

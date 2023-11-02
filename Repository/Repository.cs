@@ -55,5 +55,15 @@ namespace Web_API.Repository
         {
             throw new NotImplementedException();
         }
+
+        public async Task AddRange(List<T> entity)
+        {
+            await dbSet.AddRangeAsync(entity);
+        }
+
+        public bool Any()
+        {
+            return dbSet.Any();
+        }
     }
 }

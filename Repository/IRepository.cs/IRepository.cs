@@ -9,6 +9,8 @@ namespace Web_API.Repository.IRepository
         public Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter);
 
         Task<bool> Add(T entity);
+        Task AddRange(List<T> entity);
+        bool Any();
         Task<bool> Update(T entity);
         Task<bool> Remove(int id);
         Task<bool> RemoveRange(IEnumerable<T> entity);
