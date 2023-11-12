@@ -11,8 +11,10 @@ namespace Web_API.Repository.IRepository
         Task<bool> Add(T entity);
         Task AddRange(List<T> entity);
         bool Any();
-        Task<bool> Update(T entity);
+        bool Update(T entity);
+        bool Remove(T entity);
         Task<bool> Remove(int id);
+        Task<bool> Remove(string id);
         Task<bool> RemoveRange(IEnumerable<T> entity);
     }
 }

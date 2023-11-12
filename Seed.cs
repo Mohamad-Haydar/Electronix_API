@@ -7,6 +7,7 @@ namespace Web_API
     public class Seed
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public Seed(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -90,7 +91,7 @@ namespace Web_API
                                 Qty = 10,
                                 Sku = "sku1",
                                 Price = 210,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "8/128" },
                                     { 2, "red" }
                                 }
@@ -99,7 +100,7 @@ namespace Web_API
                                 Qty = 7,
                                 Sku = "sku2",
                                 Price = 220,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "8/128" },
                                     { 2, "blue" }
                                 }
@@ -108,7 +109,7 @@ namespace Web_API
                                 Qty = 3,
                                 Sku = "sku2",
                                 Price = 250,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "8/256" },
                                     { 2, "blue" }
                                 }
@@ -130,7 +131,7 @@ namespace Web_API
                                 Qty = 20,
                                 Sku = "sku4",
                                 Price = 1300,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "8/256" },
                                     { 2, "silver" }
                                 }
@@ -139,7 +140,7 @@ namespace Web_API
                                 Qty = 30,
                                 Sku = "sku5",
                                 Price = 1500,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "8/512" },
                                     { 2, "tetanium" }
                                 }
@@ -148,14 +149,13 @@ namespace Web_API
                                 Qty = 3,
                                 Sku = "sku6",
                                 Price = 250,
-                                optionsValues = new Dictionary<int, string>() {
+                                OptionsValues = new Dictionary<int, string>() {
                                     { 1, "10/512" },
                                     { 2, "gold" }
                                 }
                             },
                         }
                     },
-
 
                 };
 

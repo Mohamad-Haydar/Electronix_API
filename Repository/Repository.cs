@@ -46,14 +46,19 @@ namespace Web_API.Repository
             throw new NotImplementedException();
         }
 
+        public virtual async Task<bool> Remove(string id)
+        {
+            throw new NotImplementedException();
+        }
         public virtual Task<bool> RemoveRange(IEnumerable<T> entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual Task<bool> Update(T entity)
+        public bool Update(T entity)
         {
-            throw new NotImplementedException();
+            dbSet.Update(entity);
+            return true;
         }
 
         public async Task AddRange(List<T> entity)
@@ -64,6 +69,12 @@ namespace Web_API.Repository
         public bool Any()
         {
             return dbSet.Any();
+        }
+
+        public bool Remove(T entity)
+        {
+            dbSet.Remove(entity);
+            return true;
         }
     }
 }

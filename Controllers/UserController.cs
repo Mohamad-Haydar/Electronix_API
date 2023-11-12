@@ -1,9 +1,13 @@
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Web_API.Configuration;
@@ -12,6 +16,7 @@ using Web_API.Models;
 using Web_API.Models.DTO.Request;
 using Web_API.Models.DTO.Responce;
 using Web_API.Repository.IRepository;
+using Web_API.Service;
 
 namespace Web_API.Controllers
 {
@@ -19,7 +24,9 @@ namespace Web_API.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
+        private readonly IEmailService _emailService;
         private readonly JwtConfig _jwtConfig;
+        private readonly IConfiguration _configuration;
         private readonly TokenValidationParameters _tokenValidationParams;
         private readonly ILogger<UserController> _logger;
         private readonly IUnitOfWork _unitOfWork;
@@ -36,7 +43,9 @@ namespace Web_API.Controllers
             IMapper mapper,
             ILogger<UserController> logger,
             RoleManager<IdentityRole> roleManager,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IConfiguration configuration,
+            IEmailService emailService)
         {
             _db = db;
             _unitOfWork = unitOfWork;
@@ -46,12 +55,14 @@ namespace Web_API.Controllers
             _jwtConfig = optionsMonitor.CurrentValue;
             _tokenValidationParams = tokenValidationParams;
             _logger = logger;
+            _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpGet("ShowUsers")]
         public async Task<IActionResult> ShowUsers()
         {
-            var users = await _unitOfWork.UserRepository.GetAll();
+            var users = await _unitOfWork.User.GetAll();
             return Ok(users);
         }
 
@@ -88,6 +99,7 @@ namespace Web_API.Controllers
             if (isCreated.Succeeded)
             {
                 // we need to add a user to a role
+                var createRole = await _roleManager.CreateAsync(new IdentityRole("client"));
                 var resultRoleAdition = await _userManager.AddToRoleAsync(newuser, "client");
 
                 var jwtToken = await GenerateJwtToken(newuser);
@@ -147,6 +159,64 @@ namespace Web_API.Controllers
             return Ok(jwtToken);
         }
 
+        [HttpPatch("UpdateAccount")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
+        public async Task<IActionResult> UpdateAccount([FromBody] UpdateAccount userData)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Please fill all the necessary information" });
+            }
+            var user = await _unitOfWork.User.Get(x => x.Email == userData.Email);
+            if (user == null)
+            {
+                return BadRequest(new { status = "error", message = "User Dose not exists" });
+            }
+
+            user.Address = userData.Address;
+            user.PhoneNumber = userData.PhoneNumber;
+            user.UserName = userData.UserName;
+
+            if (userData.Password != null)
+            {
+                // check if the old password is the same
+                var isCorrect = await _userManager.CheckPasswordAsync(user, userData.OldPassword);
+                if (!isCorrect)
+                {
+                    return BadRequest(new { status = "error", message = "Password is not Correct" });
+                }
+
+                // verify confirmation password
+                if (userData.Password != userData.ConfirmPassword)
+                {
+                    return BadRequest(new { status = "error", message = "Password don't match" });
+                }
+
+                // make the changes in the database
+                await _userManager.ChangePasswordAsync(user, userData.OldPassword, userData.Password);
+            }
+
+            _unitOfWork.User.Update(user);
+            _unitOfWork.Save();
+            return Ok();
+        }
+
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([Required] string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            if (!string.IsNullOrEmpty(token))
+            {
+                await SendForgotPasswordEmail(user, token);
+            }
+            return Ok("You may now reset your password.");
+        }
+
         [HttpPost]
         [Route("refreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
@@ -173,6 +243,23 @@ namespace Web_API.Controllers
 
             return Ok(result);
 
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(string uid, string token, string newPassword)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Fill all the needed inputs" });
+            }
+
+            var user = await _unitOfWork.User.Get(x => x.Id == uid);
+            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+
+            _unitOfWork.Save();
+            return Ok();
         }
 
         private async Task<AuthResult> GenerateJwtToken(User user)
@@ -203,7 +290,11 @@ namespace Web_API.Controllers
                 ExpiryDate = DateTime.UtcNow.AddMonths(6),
                 Token = RandomString(35) + Guid.NewGuid()
             };
-            await _db.RefreshTokens.AddAsync(refreshToken);
+            var rt = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            if (rt == null)
+                await _db.RefreshTokens.AddAsync(refreshToken);
+            else
+                _db.RefreshTokens.Update(refreshToken);
             await _db.SaveChangesAsync();
 
             return new AuthResult()
@@ -370,6 +461,25 @@ namespace Web_API.Controllers
             var random = new Random();
             var chars = "ABCDEFJHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(x => x[random.Next(x.Length)]).ToArray());
+        }
+
+        private async Task SendForgotPasswordEmail(User user, string token)
+        {
+            string appDomain = _configuration.GetSection("Application:AppDomain").Value;
+            string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value;
+
+            UserEmailOptions options = new UserEmailOptions
+            {
+                ToEmails = new List<string>() { user.Email },
+                PlaceHolders = new List<KeyValuePair<string, string>>()
+                {
+                    new KeyValuePair<string, string>("{{UserName}}", user.UserName),
+                    new KeyValuePair<string, string>("{{Link}}",
+                        string.Format(appDomain + confirmationLink, user.Id, token))
+                }
+            };
+
+            await _emailService.SendEmailForForgotPassword(options);
         }
 
     }

@@ -14,6 +14,6 @@ namespace Web_API.Models.DTO.Responce
         [Required]
         public double Price { get; set; }
         [Required]
-        public Dictionary<string, string> optionsValues { get; set; }
+        public Dictionary<string, string>? optionsValues { get; set; }
     }
 }

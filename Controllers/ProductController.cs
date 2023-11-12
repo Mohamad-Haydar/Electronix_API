@@ -27,6 +27,8 @@ namespace Web_API.Controllers
       _mapper = mapper;
     }
 
+    #region Get Region
+
     [HttpGet("GetAllProducts")]
     public async Task<IActionResult> GetAllProducts()
     {
@@ -38,14 +40,14 @@ namespace Web_API.Controllers
     [HttpGet("GetProductsOfCategory")]
     public async Task<IActionResult> GetProductsOfCategory(int id)
     {
-      var products = await _unitOfWork.Product.GetMultiple(x => x.CategoryId == id);
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.CategoryId == id));
       return Ok(products);
     }
 
     [HttpGet("GetProductsOfManufacturer")]
     public async Task<IActionResult> GetProductsOfManufacturer(int id)
     {
-      var products = await _unitOfWork.Product.GetMultiple(x => x.ManufacturerId == id);
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.ManufacturerId == id));
       return Ok(products);
     }
 
@@ -68,7 +70,7 @@ namespace Web_API.Controllers
         Specification = product.Specification,
         Barcode = product.Barcode,
         Discount = product.Discount,
-        ImageUrl = product.ImageUrl,
+        // ImageUrl = product.ImageUrl,
         NummberOfReview = product.NummberOfReview,
         Review = product.Review,
         Manufacturer = manufacturer.ManufacturerName,
@@ -112,9 +114,95 @@ namespace Web_API.Controllers
       return Ok(ProductVM);
     }
 
+    #endregion
+
+    #region  Update Region
+
+    [HttpPatch("UpdateProduct")]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductVM updateProductVM, string id)
+    {
+      if (updateProductVM.Id != id)
+      {
+        return BadRequest();
+      }
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(new RegistrationResponce()
+        {
+          Errors = new List<string>() { "Invalid payload" },
+          Success = false
+        });
+      }
+
+      var product = await _unitOfWork.Product.GetProduct(id);
+
+      if (product == null)
+      {
+        return BadRequest(new RegistrationResponce()
+        {
+          Errors = new List<string>() { "Product not found" },
+          Success = false
+        });
+      }
+
+      var pov = await _unitOfWork.ProductVariant.GetMultiple(x => x.ProductId == id);
+
+      // update the information of the proudct if they are changed
+      product.Title = updateProductVM.Title;
+      product.Description = updateProductVM.Description;
+      product.Specification = updateProductVM.Specification;
+      product.Barcode = updateProductVM.Barcode;
+      product.Discount = updateProductVM.Discount;
+      product.ImageUrl = updateProductVM.ImageUrl;
+      product.CategoryId = updateProductVM.CategoryId;
+      product.ManufacturerId = updateProductVM.ManufacturerId;
+
+      // remove all old product variation
+      foreach (var item in pov)
+      {
+        await _unitOfWork.ProductOptionVariant.Remove(item.Id);
+      }
+      await _unitOfWork.ProductVariant.Remove(id);
+      await _unitOfWork.ProductOption.Remove(id);
+
+      // create new product variations
+      var res = CreateVariation(updateProductVM.ProductVariantsVMs, product.Id);
+      if (res == null)
+      {
+        return BadRequest(new { status = "success", message = "there where an error while creating variatin, please try again" });
+      }
+
+      _unitOfWork.Save();
+      return Ok();
+
+    }
+
+    #endregion
+
+    #region  Post Region
+
     [HttpPost("CreateProduct")]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
     public async Task<IActionResult> CreateProduct([FromBody] AddProductVM ProductVM)
     {
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(new
+        {
+          Error = "Please enter all the necessary information to create a product",
+          Success = false
+        });
+      }
+      var existingProduct = await _unitOfWork.Product.Get(x => x.Barcode == ProductVM.Barcode || x.Title == ProductVM.Title);
+      if (existingProduct != null)
+      {
+        return BadRequest(new
+        {
+          Error = "Product already exists, please enter another one or shoose to update this product",
+          Success = false
+        });
+      }
       // create a new product
       Product product = new()
       {
@@ -128,50 +216,29 @@ namespace Web_API.Controllers
         CategoryId = ProductVM.CategoryId,
         ConcurrencyStamp = "",
         ManufacturerId = ProductVM.ManufacturerId,
-        NummberOfReview = 0,
-        Review = 0
+        NummberOfReview = ProductVM.NumberOfReview,
+        Review = ProductVM.Review,
+        Stars1 = ProductVM.Star1,
+        Stars2 = ProductVM.Star2,
+        Stars3 = ProductVM.Star3,
+        Stars4 = ProductVM.Star4,
+        Stars5 = ProductVM.Star5,
       };
 
       await _unitOfWork.Product.Add(product);
 
-      foreach (var item in ProductVM.ProductVariantsVMs)
+      if (ProductVM.ProductVariantsVMs != null)
       {
-        // add new productVariant to the productvariant table
-        string pvId = Guid.NewGuid().ToString();
-        ProductVariant productVariant = new()
+        var res = CreateVariation(ProductVM.ProductVariantsVMs, product.Id);
+        if (res == null)
         {
-          Id = pvId,
-          ProductId = product.Id,
-          sku = item.Sku,
-          Qty = item.Qty,
-          Price = item.Price
-        };
-        await _unitOfWork.ProductVariant.Add(productVariant);
-
-        // add all the option value to this specific productvariant relation
-        foreach (var OV in item.optionsValues)
-        {
-          string poId = Guid.NewGuid().ToString();
-          ProductOption productOption = new()
-          {
-            Id = poId,
-            ProductId = product.Id,
-            OptionId = (int)OV.Key
-          };
-
-          ProductOptionVariant productOptionVariant = new()
-          {
-            ProductOptionId = poId,
-            ProductVariantId = pvId,
-            Value = OV.Value
-          };
-          await _unitOfWork.ProductOption.Add(productOption);
-          await _unitOfWork.ProductOptionVariant.Add(productOptionVariant);
+          return BadRequest(new { status = "success", message = "there where an error while creating variatin, please try again" });
         }
+
+        _unitOfWork.Save();
+        return Ok();
+
       }
-
-      _unitOfWork.Save();
-
 
       var options = new JsonSerializerOptions
       {
@@ -180,7 +247,7 @@ namespace Web_API.Controllers
 
       var json = JsonSerializer.Serialize(product, options);
 
-      return Ok();
+      return BadRequest(new { status = "error", Meesage = "make sure to fill all the requirments well" });
     }
 
     [HttpPost("PostReview")]
@@ -189,55 +256,138 @@ namespace Web_API.Controllers
     {
       if (!ModelState.IsValid)
       {
-        return BadRequest();
+        return BadRequest(new
+        {
+          Error = "Please fill all the user and the product information to rate the product",
+          Success = false
+        });
       }
+
       var product = await _unitOfWork.Product.Get(x => x.Id == ReviewDTO.ProductId);
+      if (product != null)
+      {
+        var oldUserReview = await _unitOfWork.UserProductReview.Get(x => x.UserId == ReviewDTO.UserId && x.ProductId == ReviewDTO.ProductId);
+
+        if (oldUserReview == null)
+        {
+          // we need to add a new review to this user
+          UserProductReview userProductReview = new()
+          {
+            UserId = ReviewDTO.UserId,
+            ProductId = ReviewDTO.ProductId,
+            Review = ReviewDTO.Review
+          };
+          await _unitOfWork.UserProductReview.Add(userProductReview);
+
+          PropertyInfo property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
+
+          int currentValue = (int)property.GetValue(product);
+          property.SetValue(product, currentValue + 1);
+
+          var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review) / (product.NummberOfReview + 1);
+          product.Review = newReview;
+          product.NummberOfReview++;
+        }
+        else
+        {
+          // we need to update the review of this user
+          // 1- substract one from the old review numbers
+          PropertyInfo property = product.GetType().GetProperty("Stars" + oldUserReview.Review);
+          int currentValue = (int)property.GetValue(product);
+          property.SetValue(product, currentValue - 1);
+
+          // 2- add one to this new review
+          property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
+          currentValue = (int)property.GetValue(product);
+          property.SetValue(product, currentValue + 1);
+
+          // 3- change the review of the product
+          var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review - oldUserReview.Review) / product.NummberOfReview;
+          product.Review = newReview;
+          oldUserReview.Review = ReviewDTO.Review;
+        }
+        _unitOfWork.Save();
+        return Ok();
+      }
+
+      return BadRequest(new
+      {
+        Error = "Product does not exists in the reviews table, please run the refrecher and retry the review",
+        Success = false
+      });
+    }
+
+    #endregion
+
+    #region Delete Region
+    [HttpDelete("DeleteProduct")]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    public async Task<IActionResult> DeleteProduct(string Id)
+    {
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(new { status = "error", message = "Please enter an ID of a product to make the remove" });
+      }
+      var product = await _unitOfWork.Product.GetProduct(Id);
       if (product == null)
       {
-        return BadRequest();
+        return BadRequest(new { status = "error", message = "product don't exists" });
       }
-      var oldUserReview = await _unitOfWork.UserProductReview.Get(x => x.UserId == ReviewDTO.UserId && x.ProductId == ReviewDTO.ProductId);
 
-      if (oldUserReview == null)
-      {
-        // we need to add a new review to this user
-        UserProductReview userProductReview = new()
-        {
-          UserId = ReviewDTO.UserId,
-          ProductId = ReviewDTO.ProductId,
-          Review = ReviewDTO.Review
-        };
-        await _unitOfWork.UserProductReview.Add(userProductReview);
-
-        PropertyInfo property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
-
-        int currentValue = (int)property.GetValue(product);
-        property.SetValue(product, currentValue + 1);
-
-        var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review) / (product.NummberOfReview + 1);
-        product.Review = newReview;
-        product.NummberOfReview++;
-      }
-      else
-      {
-        // we need to update the review of this user
-        // 1- substract one from the old review numbers
-        PropertyInfo property = product.GetType().GetProperty("Stars" + oldUserReview.Review);
-        int currentValue = (int)property.GetValue(product);
-        property.SetValue(product, currentValue - 1);
-
-        // 2- add one to this new review
-        property = product.GetType().GetProperty("Stars" + ReviewDTO.Review);
-        currentValue = (int)property.GetValue(product);
-        property.SetValue(product, currentValue + 1);
-
-        // 3- change the review of the product
-        var newReview = (product.NummberOfReview * product.Review + ReviewDTO.Review - oldUserReview.Review) / product.NummberOfReview;
-        product.Review = newReview;
-        oldUserReview.Review = ReviewDTO.Review;
-      }
+      _unitOfWork.Product.Remove(product);
       _unitOfWork.Save();
+
       return Ok();
+    }
+
+    #endregion
+    private async Task<bool> CreateVariation(ICollection<ProductVariantsVM>? productVariantsVMs, string id)
+    {
+
+      foreach (var item in productVariantsVMs)
+      {
+        // add new productVariant to the productvariant table
+        string pvId = Guid.NewGuid().ToString();
+        ProductVariant productVariant = new()
+        {
+          Id = pvId,
+          ProductId = id,
+          sku = item.Sku,
+          Qty = item.Qty,
+          Price = item.Price
+        };
+        await _unitOfWork.ProductVariant.Add(productVariant);
+
+        // add all the option value to this specific productvariant relation
+        if (item.OptionsValues != null)
+        {
+          foreach (var OV in item.OptionsValues)
+          {
+            string poId = Guid.NewGuid().ToString();
+            ProductOption productOption = new()
+            {
+              Id = poId,
+              ProductId = id,
+              OptionId = (int)OV.Key
+            };
+
+            ProductOptionVariant productOptionVariant = new()
+            {
+              ProductOptionId = poId,
+              ProductVariantId = pvId,
+              Value = OV.Value
+            };
+            await _unitOfWork.ProductOption.Add(productOption);
+            await _unitOfWork.ProductOptionVariant.Add(productOptionVariant);
+          }
+        }
+        else
+        {
+          return false;
+        }
+
+      }
+      return true;
     }
 
   }

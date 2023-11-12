@@ -9,7 +9,7 @@ namespace Web_API.Models.DTO.Responce
         public string Title { get; set; }
         public string Description { get; set; }
         public double Discount { get; set; }
-        public string ImageUrl { get; set; }
+        // public string ImageUrl { get; set; }
         public int NummberOfReview { get; set; }
         public double Review { get; set; }
 

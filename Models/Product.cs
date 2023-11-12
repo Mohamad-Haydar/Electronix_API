@@ -6,6 +6,7 @@ namespace Web_API.Models
 {
     public class Product
     {
+#pragma warning disable CS8618
         [Key]
         public string Id { get; set; }
         public string Title { get; set; }
@@ -34,5 +35,6 @@ namespace Web_API.Models
         public ICollection<UserProductReview> UserProductReviews { get; set; }
         public ICollection<ProductVariant> ProductVariants { get; set; }
         public ICollection<ProductOption> ProductOptions { get; set; }
+
     }
 }

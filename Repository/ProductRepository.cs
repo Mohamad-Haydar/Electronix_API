@@ -62,7 +62,7 @@ namespace Web_API.Repository
                     await _db.ProductVariants.AddAsync(productVariant);
 
                     // add all the option value to this specific productvariant relation
-                    foreach (var OV in item.optionsValues)
+                    foreach (var OV in item.OptionsValues)
                     {
                         string poId = Guid.NewGuid().ToString();
                         ProductOption productOption = new()
@@ -92,6 +92,5 @@ namespace Web_API.Repository
             var product = await dbSet.Where(x => x.Id == id).FirstOrDefaultAsync();
             return product;
         }
-
     }
 }

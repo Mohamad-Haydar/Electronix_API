@@ -10,9 +10,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Web_API;
+using Stripe;
+using Web_API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container.
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
@@ -48,13 +49,31 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.TokenLifespan = TimeSpan.FromHours(10));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(15);
+});
+// var server = Environment.GetEnvironmentVariable("DBServer") ?? "localhost";
+// var database = Environment.GetEnvironmentVariable("Database") ?? "Electronix";
+// var port = Environment.GetEnvironmentVariable("DBPort") ?? "1433";
+// var user = Environment.GetEnvironmentVariable("DBUser") ?? "sa";
+// var password = Environment.GetEnvironmentVariable("DBPassword") ?? "#@!76Mohamad612";
+// var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
+
+// builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
+
+
+
 
 builder.Services.Configure<IdentityOptions>(options =>
     {
@@ -65,6 +84,19 @@ builder.Services.Configure<IdentityOptions>(options =>
         options.Password.RequireNonAlphanumeric = true; // Requires at least one non-alphanumeric character
         options.Password.RequiredLength = 8; // Requires a minimum length of 8 characters
     });
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.Configure<SMTPConfigModel>(builder.Configuration.GetSection("SMTPConfig"));
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -102,10 +134,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// builder.Services.AddAuthorization(options =>
-// {
-//     options.AddPolicy("departmentPolicy", policy => policy.RequireClaim("department"));
-// });
 
 // Adding the unit of work to the DI container
 builder.Services.AddLogging();
@@ -131,13 +159,16 @@ void SeedData(IHost app)
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI();
+// }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();

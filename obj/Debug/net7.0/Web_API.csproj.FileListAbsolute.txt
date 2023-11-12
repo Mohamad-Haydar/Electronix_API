@@ -86,3 +86,7 @@
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/obj/Debug/net7.0/ref/Web_API.dll
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/AutoMapper.dll
 /home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/Newtonsoft.Json.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/Stripe.net.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/SendGrid.dll
+/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/bin/Debug/net7.0/StarkbankEcdsa.dll

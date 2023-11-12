@@ -14,5 +14,11 @@ namespace Web_API.Repository
             _db = db;
             _logger = logger;
         }
+        public override async Task<bool> Remove(string id)
+        {
+            var pvs = dbSet.Where(x => x.ProductVariantId == id);
+            dbSet.RemoveRange(pvs);
+            return true;
+        }
     }
 }

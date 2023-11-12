@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web_API.Models;
 using Web_API.Repository.IRepository;
@@ -6,6 +8,7 @@ namespace Web_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
     public class OptionController : ControllerBase
     {
         private readonly ILogger<OptionController> _logger;
@@ -30,5 +33,50 @@ namespace Web_API.Controllers
             _unitOfWork.Save();
             return Ok();
         }
+
+        [HttpPatch("UpdateOption")]
+        public async Task<IActionResult> UpdateOption([FromBody] Option Option, int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Please fill all the nessesaty information" });
+            }
+
+            if (Option.Id != id)
+            {
+                return BadRequest(new { status = "error", message = "Id don't mach" });
+            }
+
+            var option = await _unitOfWork.Option.Get(x => x.Id == id);
+            if (option == null)
+            {
+                return BadRequest(new { status = "error", message = "Option don't exists" });
+            }
+            option.OptionName = Option.OptionName;
+            _unitOfWork.Option.Update(option);
+            _unitOfWork.Save();
+            return Ok();
+        }
+
+        [HttpDelete("DeleteOption")]
+        public async Task<IActionResult> DeleteOption(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Please fill all the nessesaty information" });
+            }
+
+            var option = await _unitOfWork.Option.Get(x => x.Id == id);
+            if (option == null)
+            {
+                return BadRequest(new { status = "error", message = "Option don't exists" });
+            }
+
+            _unitOfWork.Option.Remove(option);
+            _unitOfWork.Save();
+            return Ok();
+        }
+
+
     }
 }

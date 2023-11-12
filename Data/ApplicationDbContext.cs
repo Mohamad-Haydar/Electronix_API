@@ -1,13 +1,30 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Web_API.Models;
+using Web_API.Models.DTO.Request;
+using Web_API.Repository;
+using Web_API.Repository.IRepository;
 namespace Web_API.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            try
+            {
+                var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+                if (databaseCreator != null)
+                {
+                    if (!databaseCreator.CanConnect()) databaseCreator.Create();
+                    if (!databaseCreator.HasTables()) databaseCreator.CreateTables();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -60,6 +77,111 @@ namespace Web_API.Data
 
             // refresh token relation with the user
             builder.Entity<User>().HasOne(u => u.RefreshToken).WithOne(rt => rt.User).HasForeignKey<RefreshToken>(rt => rt.UserId);
+
+            // builder.Entity<Category>().HasData(
+            //     new { ID = "1", CategoryName = "Phone" }
+            // );
+
+            // builder.Entity<Option>().HasData(
+            //     new { ID = "1", OptionName = "Ram/Memory" },
+            //     new { ID = "2", OptionName = "Color" },
+            //     new { ID = "3", OptionName = "Size" }
+            // );
+
+            // builder.Entity<Manufacturer>().HasData(
+            //     new { ID = "1", OptionName = "Tecno" },
+            //     new { ID = "2", OptionName = "Apple" },
+            //     new { ID = "3", OptionName = "Samsung" },
+            //     new { ID = "4", OptionName = "Huawei" }
+            // );
+
+            // builder.Entity<Product>().HasData(
+            //     new
+            //     {
+            //         ID = "1",
+            //         Title = "Tecno camon 17 pro",
+            //         Description = "the best phone in its category",
+            //         Specification = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets",
+            //         Barcode = "102030",
+            //         Discount = 0,
+            //         ImageUrl = "",
+            //         CategoryId = 1,
+            //         ManufacturerId = 1,
+            //         ProductVariantsVMs = new List<ProductVariantsVM>(){
+            //                 new(){
+            //                     Qty = 10,
+            //                     Sku = "sku1",
+            //                     Price = 210,
+            //                     optionsValues = new Dictionary<int, string>() {
+            //                         { 1, "8/128" },
+            //                         { 2, "red" }
+            //                     }
+            //                 },
+            //                  new(){
+            //                     Qty = 7,
+            //                     Sku = "sku2",
+            //                     Price = 220,
+            //                     optionsValues = new Dictionary<int, string>() {
+            //                         { 1, "8/128" },
+            //                         { 2, "blue" }
+            //                     }
+            //                 },
+            //                 new(){
+            //                     Qty = 3,
+            //                     Sku = "sku2",
+            //                     Price = 250,
+            //                     optionsValues = new Dictionary<int, string>() {
+            //                         { 1, "8/256" },
+            //                         { 2, "blue" }
+            //                     }
+            //                 },
+            //             }
+            //     },
+            //     new
+            //     {
+            //         ID = "2",
+            //         Title = "IPhone 15",
+            //         Description = "the best phone",
+            //         Specification = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets",
+            //         Barcode = "102031",
+            //         Discount = 0,
+            //         ImageUrl = "",
+            //         CategoryId = 1,
+            //         ManufacturerId = 2,
+            //         ProductVariantsVMs = new List<ProductVariantsVM>(){
+            //             new(){
+            //                 Qty = 20,
+            //                 Sku = "sku4",
+            //                 Price = 1300,
+            //                 optionsValues = new Dictionary<int, string>() {
+            //                     { 1, "8/256" },
+            //                     { 2, "silver" }
+            //                 }
+            //             },
+            //                 new(){
+            //                 Qty = 30,
+            //                 Sku = "sku5",
+            //                 Price = 1500,
+            //                 optionsValues = new Dictionary<int, string>() {
+            //                     { 1, "8/512" },
+            //                     { 2, "tetanium" }
+            //                 }
+            //             },
+            //             new(){
+            //                 Qty = 3,
+            //                 Sku = "sku6",
+            //                 Price = 250,
+            //                 optionsValues = new Dictionary<int, string>() {
+            //                     { 1, "10/512" },
+            //                     { 2, "gold" }
+            //                 }
+            //             },
+            //         }
+            //     }
+            // );
+
+
+
         }
 
     }

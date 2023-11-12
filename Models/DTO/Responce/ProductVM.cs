@@ -17,6 +17,6 @@ namespace Web_API.Models.DTO.Responce
         public int Stars1 { get; set; }
         public string Manufacturer { get; set; }
         public string Category { get; set; }
-        public List<ProductVariantDetailVM> ProductVariantDetailVM { get; set; }
+        public List<ProductVariantDetailVM>? ProductVariantDetailVM { get; set; }
     }
 }
