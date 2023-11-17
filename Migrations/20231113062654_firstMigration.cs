@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Web_API.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstMigration : Migration
+    public partial class firstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -241,6 +241,7 @@ namespace Web_API.Migrations
                     Stars3 = table.Column<int>(type: "int", nullable: false),
                     Stars2 = table.Column<int>(type: "int", nullable: false),
                     Stars1 = table.Column<int>(type: "int", nullable: false),
+                    AddedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ManufacturerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

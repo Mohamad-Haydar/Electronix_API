@@ -5,7 +5,6 @@ namespace Web_API.Models
 {
     public class ProductOptionVariant
     {
-#pragma warning disable CS8618
         [Key]
         public int Id { get; set; }
         public string ProductOptionId { get; set; }

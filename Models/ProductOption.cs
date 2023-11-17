@@ -6,11 +6,10 @@ namespace Web_API.Models
 {
     public class ProductOption
     {
-#pragma warning disable CS8618
         [Key]
         public string Id { get; set; }
         public string ProductId { get; set; }
-        public int? OptionId { get; set; }
+        public int OptionId { get; set; }
 
         [ForeignKey("ProductId")]
         public Product Product { get; set; }

@@ -30,6 +30,6 @@ namespace Web_API.Models.DTO.Request
         [Required]
         public int ManufacturerId { get; set; }
         [Required]
-        public ICollection<ProductVariantsVM>? ProductVariantsVMs { get; set; }
+        public ICollection<ProductVariantsVM> ProductVariantsVMs { get; set; }
     }
 }

@@ -56,21 +56,21 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.Toke
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromMinutes(15);
 });
-// var server = Environment.GetEnvironmentVariable("DBServer") ?? "localhost";
-// var database = Environment.GetEnvironmentVariable("Database") ?? "Electronix";
-// var port = Environment.GetEnvironmentVariable("DBPort") ?? "1433";
-// var user = Environment.GetEnvironmentVariable("DBUser") ?? "sa";
-// var password = Environment.GetEnvironmentVariable("DBPassword") ?? "#@!76Mohamad612";
-// var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
+var server = Environment.GetEnvironmentVariable("DBServer") ?? "localhost";
+var database = Environment.GetEnvironmentVariable("Database") ?? "Electronix";
+var port = Environment.GetEnvironmentVariable("DBPort") ?? "1433";
+var user = Environment.GetEnvironmentVariable("DBUser") ?? "sa";
+var password = Environment.GetEnvironmentVariable("DBPassword") ?? "#@!76Mohamad612";
+var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
 
-// builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
 
 
 
@@ -86,6 +86,19 @@ builder.Services.Configure<IdentityOptions>(options =>
     });
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.Configure<SMTPConfigModel>(builder.Configuration.GetSection("SMTPConfig"));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowLocalhost",
+        policy =>
+        {
+            policy
+            .WithOrigins(builder.Configuration.GetSection("Origins").Get<string[]>())
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+});
 
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 builder.Services.AddCors(options =>
@@ -164,12 +177,12 @@ void SeedData(IHost app)
 app.UseSwagger();
 app.UseSwaggerUI();
 // }
-
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseCors();
 app.UseRouting();
-
+app.UseCors("AllowLocalhost");
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

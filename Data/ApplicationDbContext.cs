@@ -26,7 +26,7 @@ namespace Web_API.Data
                 Console.WriteLine(ex.Message);
             }
         }
-        public DbSet<User> Users { get; set; }
+        public override DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<UserProductReview> UserProductReviews { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -112,7 +112,7 @@ namespace Web_API.Data
             //                     Qty = 10,
             //                     Sku = "sku1",
             //                     Price = 210,
-            //                     optionsValues = new Dictionary<int, string>() {
+            //                     OptionsValues = new Dictionary<int, string>() {
             //                         { 1, "8/128" },
             //                         { 2, "red" }
             //                     }
@@ -121,7 +121,7 @@ namespace Web_API.Data
             //                     Qty = 7,
             //                     Sku = "sku2",
             //                     Price = 220,
-            //                     optionsValues = new Dictionary<int, string>() {
+            //                     OptionsValues = new Dictionary<int, string>() {
             //                         { 1, "8/128" },
             //                         { 2, "blue" }
             //                     }
@@ -130,7 +130,7 @@ namespace Web_API.Data
             //                     Qty = 3,
             //                     Sku = "sku2",
             //                     Price = 250,
-            //                     optionsValues = new Dictionary<int, string>() {
+            //                     OptionsValues = new Dictionary<int, string>() {
             //                         { 1, "8/256" },
             //                         { 2, "blue" }
             //                     }
@@ -153,7 +153,7 @@ namespace Web_API.Data
             //                 Qty = 20,
             //                 Sku = "sku4",
             //                 Price = 1300,
-            //                 optionsValues = new Dictionary<int, string>() {
+            //                 OptionsValues = new Dictionary<int, string>() {
             //                     { 1, "8/256" },
             //                     { 2, "silver" }
             //                 }
@@ -162,7 +162,7 @@ namespace Web_API.Data
             //                 Qty = 30,
             //                 Sku = "sku5",
             //                 Price = 1500,
-            //                 optionsValues = new Dictionary<int, string>() {
+            //                 OptionsValues = new Dictionary<int, string>() {
             //                     { 1, "8/512" },
             //                     { 2, "tetanium" }
             //                 }
@@ -171,7 +171,7 @@ namespace Web_API.Data
             //                 Qty = 3,
             //                 Sku = "sku6",
             //                 Price = 250,
-            //                 optionsValues = new Dictionary<int, string>() {
+            //                 OptionsValues = new Dictionary<int, string>() {
             //                     { 1, "10/512" },
             //                     { 2, "gold" }
             //                 }

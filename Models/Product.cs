@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,7 +5,6 @@ namespace Web_API.Models
 {
     public class Product
     {
-#pragma warning disable CS8618
         [Key]
         public string Id { get; set; }
         public string Title { get; set; }
@@ -24,6 +22,7 @@ namespace Web_API.Models
         public int Stars3 { get; set; }
         public int Stars2 { get; set; }
         public int Stars1 { get; set; }
+        public DateTime AddedDate { get; set; }
 
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }

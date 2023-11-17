@@ -14,6 +14,6 @@ namespace Web_API.Models.DTO.Request
         public string ImageUrl { get; set; }
         public int CategoryId { get; set; }
         public int ManufacturerId { get; set; }
-        public ICollection<ProductVariantsVM>? ProductVariantsVMs { get; set; }
+        public ICollection<ProductVariantsVM> ProductVariantsVMs { get; set; }
     }
 }

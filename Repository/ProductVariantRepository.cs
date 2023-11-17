@@ -15,7 +15,7 @@ namespace Web_API.Repository
             _logger = logger;
         }
 
-        public override async Task<bool> Remove(string id)
+        public override bool Remove(string id)
         {
             var pvs = dbSet.Where(x => x.ProductId == id);
             dbSet.RemoveRange(pvs);

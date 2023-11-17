@@ -5,7 +5,6 @@ namespace Web_API.Models
 {
     public class RefreshToken
     {
-#pragma warning disable CS8618
         public int Id { get; set; }
         public string UserId { get; set; }
         public string Token { get; set; }

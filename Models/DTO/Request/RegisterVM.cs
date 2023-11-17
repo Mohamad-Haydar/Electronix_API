@@ -17,11 +17,11 @@ namespace Web_API.Models.DTO.Request
 
         [DataType(DataType.Password)]
         [Required]
-        public string ConfirmePassword { get; set; }
+        public string ConfirmPassword { get; set; }
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
-        public string Address { get; set; }
+        public string Country { get; set; }
 
     }
 }

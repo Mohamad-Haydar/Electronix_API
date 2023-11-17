@@ -36,21 +36,21 @@ namespace Web_API.Repository
             return list;
         }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAll()
         {
             return await dbSet.ToListAsync();
         }
 
-        public virtual async Task<bool> Remove(int id)
+        public virtual bool Remove(int id)
         {
             throw new NotImplementedException();
         }
 
-        public virtual async Task<bool> Remove(string id)
+        public virtual bool Remove(string id)
         {
             throw new NotImplementedException();
         }
-        public virtual Task<bool> RemoveRange(IEnumerable<T> entity)
+        public bool RemoveRange(IEnumerable<T> entity)
         {
             throw new NotImplementedException();
         }

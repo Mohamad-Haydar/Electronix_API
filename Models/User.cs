@@ -6,7 +6,7 @@ namespace Web_API.Models
 {
     public class User : IdentityUser
     {
-        public string Address { get; set; }
+        public string Country { get; set; }
         public ICollection<UserProductReview> UserProductReviews { get; set; }
         public RefreshToken RefreshToken { get; set; }
     }

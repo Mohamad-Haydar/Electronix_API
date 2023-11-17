@@ -35,5 +35,10 @@ namespace Web_API.Repository
         {
             _db.SaveChanges();
         }
+
+        // public static implicit operator UnitOfWork(Mock<IUnitOfWork> v)
+        // {
+        //     return v;
+        // }
     }
 }

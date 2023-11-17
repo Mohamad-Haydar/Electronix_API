@@ -19,9 +19,7 @@ services:
       - electronicapp
   server:
     container_name: "api"
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    image: api:latest-amd64
     ports:
       - 8080:80
     depends_on:

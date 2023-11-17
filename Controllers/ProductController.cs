@@ -5,6 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Web_API.Models;
 using Web_API.Models.DTO.Request;
 using Web_API.Models.DTO.Responce;
@@ -32,16 +33,49 @@ namespace Web_API.Controllers
     [HttpGet("GetAllProducts")]
     public async Task<IActionResult> GetAllProducts()
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetAll());
-
-      return Ok(products);
+      var products = await _unitOfWork.Product.GetAll();
+      List<ProductSummaryVM> psvm = new();
+      foreach (var item in products)
+      {
+        var man = await _unitOfWork.Manufacturer.Get(x => x.Id == item.ManufacturerId);
+        psvm.Add(new()
+        {
+          Id = item.Id,
+          Title = item.Title,
+          Description = item.Description,
+          Discount = item.Discount,
+          ManufacturerId = item.ManufacturerId,
+          ManufacturerName = man.ManufacturerName,
+          // ImageUrl  = item.ImageUrl,
+          NummberOfReview = item.NummberOfReview,
+          Review = item.Review,
+        });
+      }
+      return Ok(psvm);
     }
 
     [HttpGet("GetProductsOfCategory")]
-    public async Task<IActionResult> GetProductsOfCategory(int id)
+    public async Task<IActionResult> GetProductsOfCategory(string catName)
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.CategoryId == id));
-      return Ok(products);
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.Category.CategoryName.ToLower() == catName.ToLower()));
+      List<ProductSummaryVM> psvm = new();
+      foreach (var item in products)
+      {
+        var man = await _unitOfWork.Manufacturer.Get(x => x.Id == item.ManufacturerId);
+        psvm.Add(new()
+        {
+          Id = item.Id,
+          Title = item.Title,
+          Description = item.Description,
+          Discount = item.Discount,
+          ManufacturerId = item.ManufacturerId,
+          ManufacturerName = man.ManufacturerName,
+          // ImageUrl  = item.ImageUrl,
+          NummberOfReview = item.NummberOfReview,
+          Review = item.Review,
+        });
+      }
+      return Ok(psvm);
     }
 
     [HttpGet("GetProductsOfManufacturer")]
@@ -74,6 +108,8 @@ namespace Web_API.Controllers
         NummberOfReview = product.NummberOfReview,
         Review = product.Review,
         Manufacturer = manufacturer.ManufacturerName,
+        ManufacturerId = product.ManufacturerId,
+        CategoryId = product.CategoryId,
         Category = category.CategoryName,
         Stars5 = product.Stars5,
         Stars4 = product.Stars4,
@@ -112,6 +148,20 @@ namespace Web_API.Controllers
 
       ProductVM.ProductVariantDetailVM = productVariantVMs;
       return Ok(ProductVM);
+    }
+
+    [HttpGet("GetLast10Item")]
+    public async Task<IActionResult> GetLast10Item()
+    {
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetLatest(10));
+      return Ok(products);
+    }
+
+    [HttpGet("GetSpecialOffer")]
+    public async Task<IActionResult> GetSpecialOffer()
+    {
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetSpecialOffer(10));
+      return Ok(products);
     }
 
     #endregion
@@ -161,10 +211,10 @@ namespace Web_API.Controllers
       // remove all old product variation
       foreach (var item in pov)
       {
-        await _unitOfWork.ProductOptionVariant.Remove(item.Id);
+        _unitOfWork.ProductOptionVariant.Remove(item.Id);
       }
-      await _unitOfWork.ProductVariant.Remove(id);
-      await _unitOfWork.ProductOption.Remove(id);
+      _unitOfWork.ProductVariant.Remove(id);
+      _unitOfWork.ProductOption.Remove(id);
 
       // create new product variations
       var res = CreateVariation(updateProductVM.ProductVariantsVMs, product.Id);
@@ -203,51 +253,49 @@ namespace Web_API.Controllers
           Success = false
         });
       }
-      // create a new product
-      Product product = new()
+      var res = await Createproduct(ProductVM);
+      if (res)
       {
-        Id = Guid.NewGuid().ToString(),
-        Title = ProductVM.Title,
-        Description = ProductVM.Description,
-        Specification = ProductVM.Specification,
-        Barcode = ProductVM.Barcode,
-        Discount = ProductVM.Discount,
-        ImageUrl = ProductVM.ImageUrl,
-        CategoryId = ProductVM.CategoryId,
-        ConcurrencyStamp = "",
-        ManufacturerId = ProductVM.ManufacturerId,
-        NummberOfReview = ProductVM.NumberOfReview,
-        Review = ProductVM.Review,
-        Stars1 = ProductVM.Star1,
-        Stars2 = ProductVM.Star2,
-        Stars3 = ProductVM.Star3,
-        Stars4 = ProductVM.Star4,
-        Stars5 = ProductVM.Star5,
-      };
-
-      await _unitOfWork.Product.Add(product);
-
-      if (ProductVM.ProductVariantsVMs != null)
-      {
-        var res = CreateVariation(ProductVM.ProductVariantsVMs, product.Id);
-        if (res == null)
-        {
-          return BadRequest(new { status = "success", message = "there where an error while creating variatin, please try again" });
-        }
-
         _unitOfWork.Save();
         return Ok();
-
       }
 
-      var options = new JsonSerializerOptions
+      return BadRequest(new { status = "error", Meesage = "review the file to check the data inside it" });
+    }
+
+    [HttpPost("SeedProducts")]
+    public async Task<IActionResult> SeedProducts([FromForm] IFormFile file)
+    {
+      if (file == null || file.Length == 0)
+        return BadRequest("No file uploaded.");
+
+      // Ensure the uploaded file is an image (optional)
+      if (file.ContentType.ToLower() != "application/json")
+        return BadRequest("Invalid file type. Please upload Json file");
+
+      // Read the content of the JSON file
+      using (var streamReader = new StreamReader(file.OpenReadStream()))
       {
-        ReferenceHandler = ReferenceHandler.Preserve
-      };
-
-      var json = JsonSerializer.Serialize(product, options);
-
-      return BadRequest(new { status = "error", Meesage = "make sure to fill all the requirments well" });
+        var jsonContent = await streamReader.ReadToEndAsync();
+        try
+        {
+          var jsonObject = JsonConvert.DeserializeObject<List<AddProductVM>>(jsonContent);
+          foreach (var item in jsonObject)
+          {
+            var res = await Createproduct(item);
+            if (!res)
+            {
+              return BadRequest();
+            }
+          }
+          _unitOfWork.Save();
+        }
+        catch (System.Text.Json.JsonException)
+        {
+          return BadRequest("Invalid JSON format.");
+        }
+      }
+      return Ok();
     }
 
     [HttpPost("PostReview")]
@@ -317,6 +365,7 @@ namespace Web_API.Controllers
       });
     }
 
+
     #endregion
 
     #region Delete Region
@@ -341,7 +390,7 @@ namespace Web_API.Controllers
     }
 
     #endregion
-    private async Task<bool> CreateVariation(ICollection<ProductVariantsVM>? productVariantsVMs, string id)
+    private async Task<bool> CreateVariation(ICollection<ProductVariantsVM> productVariantsVMs, string id)
     {
 
       foreach (var item in productVariantsVMs)
@@ -388,6 +437,46 @@ namespace Web_API.Controllers
 
       }
       return true;
+    }
+
+    private async Task<bool> Createproduct(AddProductVM ProductVM)
+    {
+      // create a new product
+      Product product = new()
+      {
+        Id = Guid.NewGuid().ToString(),
+        Title = ProductVM.Title,
+        Description = ProductVM.Description,
+        Specification = ProductVM.Specification,
+        Barcode = ProductVM.Barcode,
+        Discount = ProductVM.Discount,
+        ImageUrl = ProductVM.ImageUrl,
+        CategoryId = ProductVM.CategoryId,
+        AddedDate = DateTime.Now,
+        ConcurrencyStamp = "",
+        ManufacturerId = ProductVM.ManufacturerId,
+        NummberOfReview = ProductVM.NumberOfReview,
+        Review = ProductVM.Review,
+        Stars1 = ProductVM.Star1,
+        Stars2 = ProductVM.Star2,
+        Stars3 = ProductVM.Star3,
+        Stars4 = ProductVM.Star4,
+        Stars5 = ProductVM.Star5,
+      };
+
+      await _unitOfWork.Product.Add(product);
+
+      if (ProductVM.ProductVariantsVMs != null)
+      {
+        var res = CreateVariation(ProductVM.ProductVariantsVMs, product.Id);
+        if (res == null)
+        {
+          return false;
+        }
+        return true;
+
+      }
+      return false;
     }
 
   }

@@ -24,6 +24,11 @@ namespace Web_API.Repository
             return true;
         }
 
+        public override async Task<IEnumerable<Product>> GetAll()
+        {
+            return await dbSet.ToListAsync();
+        }
+
         public async Task AddProductRange(List<AddProductVM> products)
         {
             foreach (var ProductVM in products)
@@ -87,10 +92,20 @@ namespace Web_API.Repository
 
         }
 
+        public async Task<IEnumerable<Product>> GetLatest(int number)
+        {
+            return await dbSet.OrderByDescending(p => p.AddedDate).Take(number).ToListAsync();
+        }
+
         public async Task<Product> GetProduct(string id)
         {
             var product = await dbSet.Where(x => x.Id == id).FirstOrDefaultAsync();
             return product;
+        }
+
+        public async Task<IEnumerable<Product>> GetSpecialOffer(int number)
+        {
+            return await dbSet.Where(x => x.Discount != 0).OrderByDescending(p => p.AddedDate).Take(number).ToListAsync();
         }
     }
 }

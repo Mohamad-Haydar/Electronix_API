@@ -5,6 +5,7 @@ using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ using Web_API.Service;
 
 namespace Web_API.Controllers
 {
+    [EnableCors("AllowLocalhost")]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -93,13 +95,13 @@ namespace Web_API.Controllers
                 });
             }
 
-            var newuser = new User() { Email = RegisterVM.Email, UserName = RegisterVM.UserName, Address = RegisterVM.Address };
+            var newuser = new User() { Email = RegisterVM.Email, UserName = RegisterVM.UserName, Country = RegisterVM.Country };
             var isCreated = await _userManager.CreateAsync(newuser, RegisterVM.Password);
 
             if (isCreated.Succeeded)
             {
                 // we need to add a user to a role
-                var createRole = await _roleManager.CreateAsync(new IdentityRole("client"));
+                // var createRole = await _roleManager.CreateAsync(new IdentityRole("client"));
                 var resultRoleAdition = await _userManager.AddToRoleAsync(newuser, "client");
 
                 var jwtToken = await GenerateJwtToken(newuser);
@@ -159,6 +161,38 @@ namespace Web_API.Controllers
             return Ok(jwtToken);
         }
 
+        [HttpPost("Logout")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Logout()
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var token = HttpContext.Request.Cookies["jwtToken"];
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+
+            var tokenInVerfication = jwtTokenHandler.ValidateToken(token, _tokenValidationParams, out var validatedToken);
+            var tokenId = tokenInVerfication.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+            var rtDb = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+            _db.RefreshTokens.Remove(rtDb);
+
+            Response.Cookies.Delete("jwtToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                // SameSite=SameSiteMode.Strict
+            });
+            Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                // SameSite=SameSiteMode.Strict
+            });
+
+            _unitOfWork.Save();
+
+            return Ok();
+        }
+
         [HttpPatch("UpdateAccount")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
         public async Task<IActionResult> UpdateAccount([FromBody] UpdateAccount userData)
@@ -173,7 +207,7 @@ namespace Web_API.Controllers
                 return BadRequest(new { status = "error", message = "User Dose not exists" });
             }
 
-            user.Address = userData.Address;
+            user.Country = userData.Address;
             user.PhoneNumber = userData.PhoneNumber;
             user.UserName = userData.UserName;
 
@@ -219,16 +253,15 @@ namespace Web_API.Controllers
 
         [HttpPost]
         [Route("refreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+        public async Task<IActionResult> RefreshToken()
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new RegistrationResponce()
-                {
-                    Errors = new List<string>() { "Invalid payload" },
-                    Success = false
-                });
-            }
+
+            TokenRequest tokenRequest = new TokenRequest();
+            var jwtToken = HttpContext.Request.Cookies["jwtToken"];
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+
+            tokenRequest.Token = jwtToken;
+            tokenRequest.RefreshToken = refreshToken;
 
             var result = await VerifyAndGenerateToken(tokenRequest);
 
@@ -294,8 +327,26 @@ namespace Web_API.Controllers
             if (rt == null)
                 await _db.RefreshTokens.AddAsync(refreshToken);
             else
+            {
+                _db.Entry(rt).State = EntityState.Detached;
+                refreshToken.Id = rt.Id;
                 _db.RefreshTokens.Update(refreshToken);
+            }
             await _db.SaveChangesAsync();
+
+            Response.Cookies.Append("jwtToken", jwtToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", refreshToken.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
 
             return new AuthResult()
             {

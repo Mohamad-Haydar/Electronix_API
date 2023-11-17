@@ -13,6 +13,6 @@ namespace Web_API.Models.DTO.Request
         [Required]
         public double Price { get; set; }
         [Required]
-        public Dictionary<int, string>? OptionsValues { get; set; }
+        public Dictionary<int, string> OptionsValues { get; set; }
     }
 }

@@ -11,12 +11,11 @@ namespace Web_API.Controllers
     // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
     public class CategoryController : ControllerBase
     {
-        private readonly ILogger<CategoryController> _logger;
+        // private readonly ILogger<CategoryController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryController(ILogger<CategoryController> logger, IUnitOfWork unitOfWork)
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 
