@@ -8,7 +8,6 @@ namespace Web_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
     public class OptionController : ControllerBase
     {
         private readonly ILogger<OptionController> _logger;
@@ -27,6 +26,7 @@ namespace Web_API.Controllers
         }
 
         [HttpPost("AddOption")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
         public async Task<IActionResult> AddOption([FromBody] Option Option)
         {
             await _unitOfWork.Option.Add(Option);
@@ -35,6 +35,7 @@ namespace Web_API.Controllers
         }
 
         [HttpPatch("UpdateOption")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
         public async Task<IActionResult> UpdateOption([FromBody] Option Option, int id)
         {
             if (!ModelState.IsValid)
@@ -59,6 +60,7 @@ namespace Web_API.Controllers
         }
 
         [HttpDelete("DeleteOption")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
         public async Task<IActionResult> DeleteOption(int id)
         {
             if (!ModelState.IsValid)

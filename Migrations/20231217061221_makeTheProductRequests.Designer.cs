@@ -12,8 +12,8 @@ using Web_API.Data;
 namespace Web_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231113062654_firstMigration")]
-    partial class firstMigration
+    [Migration("20231217061221_makeTheProductRequests")]
+    partial class makeTheProductRequests
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,12 +167,37 @@ namespace Web_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CategoryName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Web_API.Models.DashbordUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Adress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ZipCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("DashbordUsers");
                 });
 
             modelBuilder.Entity("Web_API.Models.Manufacturer", b =>
@@ -184,7 +209,6 @@ namespace Web_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ManufacturerName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -201,7 +225,6 @@ namespace Web_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("OptionName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -218,25 +241,21 @@ namespace Web_API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Barcode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Discount")
                         .HasColumnType("float");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ManufacturerId")
@@ -249,7 +268,6 @@ namespace Web_API.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("Specification")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Stars1")
@@ -268,7 +286,6 @@ namespace Web_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -285,12 +302,10 @@ namespace Web_API.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("OptionId")
-                        .IsRequired()
+                    b.Property<int>("OptionId")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -311,15 +326,12 @@ namespace Web_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ProductOptionId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProductVariantId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -340,14 +352,12 @@ namespace Web_API.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("ProductId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Qty")
                         .HasColumnType("int");
 
                     b.Property<string>("sku")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -355,6 +365,37 @@ namespace Web_API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("Web_API.Models.ProductsRequests", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PaymentComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PaymentSecret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("float");
+
+                    b.Property<string>("sku")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductsRequests");
                 });
 
             modelBuilder.Entity("Web_API.Models.RefreshToken", b =>
@@ -378,21 +419,19 @@ namespace Web_API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("JwtId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -405,12 +444,11 @@ namespace Web_API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -475,14 +513,12 @@ namespace Web_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ProductId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Review")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -545,6 +581,15 @@ namespace Web_API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Web_API.Models.DashbordUser", b =>
+                {
+                    b.HasOne("Web_API.Models.User", "User")
+                        .WithOne("DashbordUser")
+                        .HasForeignKey("Web_API.Models.DashbordUser", "UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Web_API.Models.Product", b =>
                 {
                     b.HasOne("Web_API.Models.Category", "Category")
@@ -575,8 +620,7 @@ namespace Web_API.Migrations
                     b.HasOne("Web_API.Models.Product", "Product")
                         .WithMany("ProductOptions")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Option");
 
@@ -588,14 +632,12 @@ namespace Web_API.Migrations
                     b.HasOne("Web_API.Models.ProductOption", "ProductOption")
                         .WithMany("ProductOptionVariants")
                         .HasForeignKey("ProductOptionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Web_API.Models.ProductVariant", "ProductVariant")
                         .WithMany("ProductOptionVariants")
                         .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ProductOption");
 
@@ -607,8 +649,7 @@ namespace Web_API.Migrations
                     b.HasOne("Web_API.Models.Product", "Product")
                         .WithMany("ProductVariants")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Product");
                 });
@@ -617,9 +658,7 @@ namespace Web_API.Migrations
                 {
                     b.HasOne("Web_API.Models.User", "User")
                         .WithOne("RefreshToken")
-                        .HasForeignKey("Web_API.Models.RefreshToken", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Web_API.Models.RefreshToken", "UserId");
 
                     b.Navigation("User");
                 });
@@ -629,14 +668,12 @@ namespace Web_API.Migrations
                     b.HasOne("Web_API.Models.Product", "Product")
                         .WithMany("UserProductReviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Web_API.Models.User", "User")
                         .WithMany("UserProductReviews")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Product");
 
@@ -679,8 +716,9 @@ namespace Web_API.Migrations
 
             modelBuilder.Entity("Web_API.Models.User", b =>
                 {
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
+                    b.Navigation("DashbordUser");
+
+                    b.Navigation("RefreshToken");
 
                     b.Navigation("UserProductReviews");
                 });

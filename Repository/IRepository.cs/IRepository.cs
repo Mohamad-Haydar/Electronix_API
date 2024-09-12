@@ -4,9 +4,9 @@ namespace Web_API.Repository.IRepository
 {
     public interface IRepository<T> where T : class
     {
-        public Task<IEnumerable<T>> GetAll();
-        Task<T> Get(Expression<Func<T, bool>> filter);
-        public Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter);
+        public Task<IEnumerable<T>> GetAll(params Expression<Func<T, object>>[] includes);
+        Task<T> Get(Expression<Func<T, bool>> filter, bool track = true, params Expression<Func<T, object>>[] includes);
+        public Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter, params Expression<Func<T, object>>[] includes);
 
         Task<bool> Add(T entity);
         Task AddRange(List<T> entity);

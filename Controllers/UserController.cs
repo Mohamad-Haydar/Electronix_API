@@ -6,9 +6,11 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Web_API.Configuration;
@@ -24,6 +26,7 @@ namespace Web_API.Controllers
     [EnableCors("AllowLocalhost")]
     [ApiController]
     [Route("api/[controller]")]
+    // [assembly: InternalsVisibleToAttribute("Friend2")]
     public class UserController : ControllerBase
     {
         private readonly IEmailService _emailService;
@@ -47,7 +50,8 @@ namespace Web_API.Controllers
             RoleManager<IdentityRole> roleManager,
             UserManager<User> userManager,
             IConfiguration configuration,
-            IEmailService emailService)
+            IEmailService emailService
+            )
         {
             _db = db;
             _unitOfWork = unitOfWork;
@@ -62,62 +66,94 @@ namespace Web_API.Controllers
         }
 
         [HttpGet("ShowUsers")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
         public async Task<IActionResult> ShowUsers()
         {
-            var users = await _unitOfWork.User.GetAll();
+            var users = _mapper.Map<List<ClientVM>>(await _userManager.GetUsersInRoleAsync("client"));
+            if (!users.Any())
+            {
+                return NoContent();
+            }
             return Ok(users);
         }
 
+        [HttpGet("ShowCrew")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ShowCrew()
+        {
+            // var dashAtrtribut = _mapper.Map<List<DashboardUsersVM>>(await _unitOfWork.DashboardUser.GetAll(x => x.User));
+
+            var dashAtrtribut = await _unitOfWork.DashboardUser.GetAll(x => x.User);
+            var crewInfo = new List<DashboardUsersVM>();
+            foreach (var item in dashAtrtribut)
+            {
+                var role = (await _userManager.GetRolesAsync(item.User))[0];
+                crewInfo.Add(new()
+                {
+                    Id = item.Id,
+                    UserName = item.User.UserName,
+                    Email = item.User.Email,
+                    PhoneNumber = item.User.PhoneNumber,
+                    ZipCode = item.ZipCode,
+                    City = item.City,
+                    Adress = item.Adress,
+                    Country = item.User.Country,
+                    Role = role,
+                });
+            }
+
+            if (!crewInfo.Any())
+            {
+                return NoContent();
+            }
+
+            return Ok(crewInfo);
+        }
+
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode: StatusCodes.Status201Created)]
+        [ProducesResponseType(statusCode: StatusCodes.Status409Conflict)]
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterVM RegisterVM)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new RegistrationResponce()
-                {
-                    Errors = new List<string>(){
-                        "Invalid Paylpoad"
-                    },
-                    Success = false
-                });
-            }
-
-            var existingUser = await _userManager.FindByEmailAsync(RegisterVM.Email);
-
-            if (existingUser != null)
-            {
-                return BadRequest(new RegistrationResponce()
-                {
-                    Errors = new List<string>(){
-                        "User Already Exists"
-                    },
-                    Success = false
-                });
-            }
-
-            var newuser = new User() { Email = RegisterVM.Email, UserName = RegisterVM.UserName, Country = RegisterVM.Country };
-            var isCreated = await _userManager.CreateAsync(newuser, RegisterVM.Password);
-
-            if (isCreated.Succeeded)
-            {
-                // we need to add a user to a role
-                // var createRole = await _roleManager.CreateAsync(new IdentityRole("client"));
-                var resultRoleAdition = await _userManager.AddToRoleAsync(newuser, "client");
-
-                var jwtToken = await GenerateJwtToken(newuser);
-
-                return Ok(jwtToken);
-            }
-            else
-            {
-                return BadRequest(new RegistrationResponce()
-                {
-                    Errors = isCreated.Errors.Select(x => x.Description).ToList(),
-                    Success = false
-                });
-            }
+            return await CreateUser(RegisterVM, "client");
         }
 
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode: StatusCodes.Status201Created)]
+        [ProducesResponseType(statusCode: StatusCodes.Status409Conflict)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
+        [HttpPost("CreateAdmin")]
+        public async Task<IActionResult> CreateAdmin([FromBody] RegisterVM RegisterVM)
+        {
+            return await CreateUser(RegisterVM, "admin", false);
+        }
+
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode: StatusCodes.Status201Created)]
+        [ProducesResponseType(statusCode: StatusCodes.Status409Conflict)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "owner")]
+        [HttpPost("CreateOwner")]
+        public async Task<IActionResult> CreateOwner([FromBody] RegisterVM RegisterVM)
+        {
+            return await CreateUser(RegisterVM, "owner", false);
+        }
+
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode: StatusCodes.Status201Created)]
+        [ProducesResponseType(statusCode: StatusCodes.Status409Conflict)]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginVM loginVM)
         {
@@ -136,41 +172,44 @@ namespace Web_API.Controllers
 
             if (existingUser == null)
             {
-                return NotFound(new RegistrationResponce()
-                {
-                    Errors = new List<string>(){
-                        "Invalid Login Request"
-                    },
-                    Success = false
-                });
+                return NotFound(new { state = "Error", message = "user not exists, please check the email" });
             }
 
             var isCorrect = await _userManager.CheckPasswordAsync(existingUser, loginVM.Password);
             if (!isCorrect)
             {
-                return NotFound(new RegistrationResponce()
-                {
-                    Errors = new List<string>(){
-                        "Wrong password"
-                    },
-                    Success = false
-                });
+                return NotFound(new { state = "Error", message = "Wrong password, please enter a valid one" });
             }
 
-            var jwtToken = await GenerateJwtToken(existingUser);
-            return Ok(jwtToken);
+            string appDomain = _configuration.GetSection("Application:AppDomain").Value;
+            string dashBoardDomain = _configuration.GetSection("Application:DashBoardDomain").Value;
+
+            var role = await _userManager.GetRolesAsync(existingUser);
+            var hasOrigin = this.Request.Headers.TryGetValue("Origin", out var origin);
+            var domain = appDomain;
+
+            if (dashBoardDomain.Contains(origin))
+            {
+                if (role[0] == "client")
+                {
+                    return BadRequest(new { message = "your are not allowed to access this website" });
+                }
+                var jwtToken = await GenerateJwtToken(role[0], existingUser, false);
+                return Ok(jwtToken);
+            }
+            else
+            {
+                var jwtToken = await GenerateJwtToken(role[0], existingUser, true);
+                return Ok(jwtToken);
+            }
         }
 
         [HttpPost("Logout")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Logout()
         {
-            var jwtTokenHandler = new JwtSecurityTokenHandler();
-            var token = HttpContext.Request.Cookies["jwtToken"];
             var refreshToken = HttpContext.Request.Cookies["refreshToken"];
-
-            var tokenInVerfication = jwtTokenHandler.ValidateToken(token, _tokenValidationParams, out var validatedToken);
-            var tokenId = tokenInVerfication.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
             var rtDb = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.Token == refreshToken);
 
             _db.RefreshTokens.Remove(rtDb);
@@ -178,14 +217,16 @@ namespace Web_API.Controllers
             Response.Cookies.Delete("jwtToken", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                // SameSite=SameSiteMode.Strict
+                SameSite = SameSiteMode.None,
+                IsEssential = true,
+                Secure = true
             });
             Response.Cookies.Delete("refreshToken", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                // SameSite=SameSiteMode.Strict
+                SameSite = SameSiteMode.None,
+                IsEssential = true,
+                Secure = true
             });
 
             _unitOfWork.Save();
@@ -194,7 +235,11 @@ namespace Web_API.Controllers
         }
 
         [HttpPatch("UpdateAccount")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+        [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdateAccount([FromBody] UpdateAccount userData)
         {
             if (!ModelState.IsValid)
@@ -204,7 +249,7 @@ namespace Web_API.Controllers
             var user = await _unitOfWork.User.Get(x => x.Email == userData.Email);
             if (user == null)
             {
-                return BadRequest(new { status = "error", message = "User Dose not exists" });
+                return NotFound(new { status = "error", message = "User Dose not exists" });
             }
 
             user.Country = userData.Address;
@@ -236,29 +281,48 @@ namespace Web_API.Controllers
         }
 
         [HttpPost("ForgotPassword")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+        [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ForgotPassword([Required] string email)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Please Enter the email" });
+            }
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                return BadRequest("User not found.");
+                return NotFound(new { status = "error", message = "User Dose not exists" });
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             if (!string.IsNullOrEmpty(token))
             {
                 await SendForgotPasswordEmail(user, token);
             }
-            return Ok("You may now reset your password.");
+            return Ok(new { status = "success", message = "We sent an email to verify your identity, please verify it in 15 min." });
         }
 
         [HttpPost]
         [Route("refreshToken")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+        [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken()
         {
-
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "Invalid Payload" });
+            }
             TokenRequest tokenRequest = new TokenRequest();
             var jwtToken = HttpContext.Request.Cookies["jwtToken"];
             var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+            if (jwtToken == null || refreshToken == null)
+            {
+                return BadRequest(new { status = "error", message = "you need to include access and refresh" });
+            }
 
             tokenRequest.Token = jwtToken;
             tokenRequest.RefreshToken = refreshToken;
@@ -267,11 +331,12 @@ namespace Web_API.Controllers
 
             if (result == null)
             {
-                return BadRequest(new RegistrationResponce()
-                {
-                    Errors = new List<string>() { "Invalid Tokens" },
-                    Success = false
-                });
+                return Unauthorized(new { status = "error", message = "Invalid Token" });
+            }
+
+            if (result.Success == false)
+            {
+                return BadRequest(result);
             }
 
             return Ok(result);
@@ -280,23 +345,41 @@ namespace Web_API.Controllers
 
         [HttpPost]
         [Route("ResetPassword")]
-        public async Task<IActionResult> ResetPassword(string uid, string token, string newPassword)
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+        [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto rpDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { status = "error", message = "Fill all the needed inputs" });
+                return BadRequest(new { status = "error", message = "Fill all the required inputs" });
             }
 
-            var user = await _unitOfWork.User.Get(x => x.Id == uid);
-            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            var user = await _userManager.FindByIdAsync(rpDto.UserId);
+            if (user == null)
+            {
+                return NotFound(new { status = "error", message = "User Not Found" });
+            }
+            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, rpDto.Token, rpDto.NewPassword);
 
-
-            _unitOfWork.Save();
-            return Ok();
+            if (resetPasswordResult.Succeeded)
+            {
+                _unitOfWork.Save();
+                return Ok(new { status = "success", message = "Password Is Updated" });
+            }
+            else
+            {
+                return BadRequest(new { status = "error", message = "use the Token one time only" });
+            }
         }
 
-        private async Task<AuthResult> GenerateJwtToken(User user)
+        private async Task<AuthResult> GenerateJwtToken(string role, User user, bool sendAccessToken = true)
         {
+            if (user.Email == "FAKE")
+            {
+                return null;
+            }
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
             var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
@@ -306,7 +389,7 @@ namespace Web_API.Controllers
             var tokenDescription = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(2),
+                Expires = DateTime.UtcNow.AddMinutes(10),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -334,25 +417,41 @@ namespace Web_API.Controllers
             }
             await _db.SaveChangesAsync();
 
-            Response.Cookies.Append("jwtToken", jwtToken, new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax
-            });
+                Expires = refreshToken.ExpiryDate,
+                SameSite = SameSiteMode.None,
+                IsEssential = true,
+                Secure = true
+            };
 
-            Response.Cookies.Append("refreshToken", refreshToken.Token, new CookieOptions
+            var cookieOptionsForDashboard = new CookieOptions
             {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax
-            });
+                SameSite = SameSiteMode.None,
+                IsEssential = true,
+                Secure = true
+            };
+
+
+            if (sendAccessToken)
+            {
+                Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
+            }
+            else
+            {
+                Response.Cookies.Append("jwtToken", jwtToken, cookieOptionsForDashboard);
+            }
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
 
             return new AuthResult()
             {
                 Token = jwtToken,
                 Success = true,
-                RefreshToken = refreshToken.Token
+                // RefreshToken = refreshToken.Token,
+                Email = user.Email,
+                Role = role,
+                UserName = user.UserName
             };
         }
 
@@ -380,21 +479,29 @@ namespace Web_API.Controllers
                 var utcExpiryDate = long.Parse(tokenInVerfication.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
 
                 var expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
+                var storedToken = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
+                var role = await _userManager.GetRolesAsync(dbUser);
 
                 if (expiryDate > DateTime.UtcNow)
                 {
+                    var jsonToken = jwtTokenHandler.ReadToken(tokenRequest.Token) as JwtSecurityToken;
+                    var email = jsonToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email).Value;
                     return new AuthResult()
                     {
-                        Success = false,
+                        Success = true,
                         Errors = new List<string>(){
                             "Token has not yet expired"
-                        }
+                        },
+                        Token = tokenRequest.Token,
+                        Email = email,
+                        UserName = dbUser.UserName,
+                        Role = role[0]
+
                     };
                 }
 
                 // validation 4 - validate existence of the token
-                var storedToken = _db.RefreshTokens.FirstOrDefault(x => x.Token == tokenRequest.RefreshToken);
-
                 if (storedToken == null)
                 {
                     return new AuthResult()
@@ -447,11 +554,14 @@ namespace Web_API.Controllers
                 // update current token
                 storedToken.IsUsed = true;
                 _db.RefreshTokens.Update(storedToken);
-                await _db.SaveChangesAsync();
+                _db.SaveChanges();
 
                 // generate new token
-                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
-                return await GenerateJwtToken(dbUser);
+                if (role[0] != "client")
+                {
+                    return await GenerateJwtToken(role[0], dbUser, false);
+                }
+                return await GenerateJwtToken(role[0], dbUser);
 
             }
 
@@ -517,8 +627,17 @@ namespace Web_API.Controllers
         private async Task SendForgotPasswordEmail(User user, string token)
         {
             string appDomain = _configuration.GetSection("Application:AppDomain").Value;
+            string dashBoardDomain = _configuration.GetSection("Application:DashBoardDomain").Value;
             string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value;
-
+            var hasOrigin = this.Request.Headers.TryGetValue("Origin", out var origin);
+            var domain = appDomain;
+            if (hasOrigin)
+            {
+                if (dashBoardDomain.Contains(origin))
+                {
+                    domain = dashBoardDomain;
+                }
+            }
             UserEmailOptions options = new UserEmailOptions
             {
                 ToEmails = new List<string>() { user.Email },
@@ -526,11 +645,77 @@ namespace Web_API.Controllers
                 {
                     new KeyValuePair<string, string>("{{UserName}}", user.UserName),
                     new KeyValuePair<string, string>("{{Link}}",
-                        string.Format(appDomain + confirmationLink, user.Id, token))
+                        string.Format(domain + confirmationLink, user.Id, token))
                 }
             };
 
             await _emailService.SendEmailForForgotPassword(options);
+        }
+
+
+        private async Task<IActionResult> CreateUser(RegisterVM RegisterVM, string role, bool sendAllTokens = true)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new RegistrationResponce()
+                {
+                    Errors = new List<string>(){
+                        "Invalid Paylpoad"
+                    },
+                    Success = false
+                });
+            }
+
+            var existingUser = await _userManager.FindByEmailAsync(RegisterVM.Email);
+
+            if (existingUser != null)
+            {
+                return Conflict(new { status = "Error", message = "User Already Exists" });
+            }
+
+            var newuser = new User() { Email = RegisterVM.Email, UserName = RegisterVM.UserName, Country = RegisterVM.Country };
+            IdentityResult isCreated;
+            if (role == "client")
+            {
+                isCreated = await _userManager.CreateAsync(newuser, RegisterVM.Password);
+            }
+            else
+            {
+                var DashbordUserAttributes = new DashbordUser()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = newuser.Id,
+                    ZipCode = RegisterVM.ZipCode,
+                    City = RegisterVM.City,
+                    Adress = RegisterVM.Adress
+                };
+                var dashAtrtribut = await _unitOfWork.DashboardUser.Add(DashbordUserAttributes);
+                isCreated = await _userManager.CreateAsync(newuser, RegisterVM.Password);
+            }
+
+            if (isCreated.Succeeded)
+            {
+                // we need to add a user to a role
+                var roleExists = await _roleManager.RoleExistsAsync(role);
+                if (!roleExists)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                }
+
+                var resultRoleAdition = await _userManager.AddToRoleAsync(newuser, role);
+
+                if (sendAllTokens)
+                {
+                    var jwtToken = await GenerateJwtToken(role, newuser);
+
+                    return StatusCode(201, jwtToken);
+                }
+                return Ok(new { status = "success", message = "new " + role + " Is Created" });
+            }
+            else
+            {
+                return StatusCode(500, new { status = "Error", message = "Not able to crate your account, Please try again later", errors = isCreated.Errors });
+            }
         }
 
     }

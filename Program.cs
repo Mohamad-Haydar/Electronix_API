@@ -12,6 +12,8 @@ using Microsoft.OpenApi.Models;
 using Web_API;
 using Stripe;
 using Web_API.Service;
+using System.Text.Json.Serialization;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +43,24 @@ builder.Services.AddAuthentication(options =>
 {
     jwt.SaveToken = true;
     jwt.TokenValidationParameters = tokenValidationParams;
+    jwt.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies["jwtToken"];
+            return Task.CompletedTask;
+        }
+    };
 });
+
+// Configure rate limiting options
+// builder.Services.AddOptions();
+// builder.Services.AddMemoryCache();
+// builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+// builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+
+// // Add rate limiting Services
+// builder.Services.AddInMemoryRateLimiting();
 
 
 
@@ -56,24 +75,15 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.Toke
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-{
-    options.TokenLifespan = TimeSpan.FromMinutes(15);
-});
 var server = Environment.GetEnvironmentVariable("DBServer") ?? "localhost";
 var database = Environment.GetEnvironmentVariable("Database") ?? "Electronix";
 var port = Environment.GetEnvironmentVariable("DBPort") ?? "1433";
 var user = Environment.GetEnvironmentVariable("DBUser") ?? "sa";
 var password = Environment.GetEnvironmentVariable("DBPassword") ?? "#@!76Mohamad612";
 var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
+// var ConnectionString = "Server=Electronix.mssql.somee.com;Database=Electronix;User=MohamadElectron_SQLLogin_1;Password=r47vitfn4r;TrustServerCertificate=True";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
-
-
-
 
 builder.Services.Configure<IdentityOptions>(options =>
     {
@@ -101,14 +111,17 @@ builder.Services.AddCors(options =>
 });
 
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
+
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential 
+    // cookies is needed for a given request.
+    options.CheckConsentNeeded = context => true;
+
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -170,7 +183,7 @@ void SeedData(IHost app)
     }
 }
 
-
+// app.UseIpRateLimiting();
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
@@ -179,13 +192,61 @@ app.UseSwaggerUI();
 // }
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseCookiePolicy();
 app.UseRouting();
+
 app.UseCors("AllowLocalhost");
-app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
+// clear()
+// fetch("http://192.168.1.6:5148/api/user/login", {
+//     method: "POST",
+//     mode: "cors", 
+//     credentials: "include", 
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       email: "ali@email.com",
+//       password: "Pass1234!"
+//     })
+//   }).then(res => res.json());
+
+// clear()
+
+// fetch("https://192.168.1.9:7278/api/user/login", {
+//     method: "POST",
+//     mode: "cors", 
+//     credentials: "include", 
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       email: "owner@examlpe.com",
+//       password: "Pass1234!"
+//     })
+//   }).then(res => res.json());
+
+
+// fetch("https://192.168.1.9:7278/api/user/createadmin", {
+//     method: "POST",
+//     mode: "cors", 
+//     credentials: "include", 
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       username: "Admin",
+//       email: "newAdmin@examlpe.com",
+//      	password: "Pass1234!",
+//       confirmPassword: "Pass1234!",
+//       phoneNumber: "string",
+//       country: "string"
+//     })
+//   }).then(res => res.json());

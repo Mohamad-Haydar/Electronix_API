@@ -23,22 +23,46 @@ namespace Web_API.Repository
             return true;
         }
 
-        public virtual async Task<T> Get(Expression<Func<T, bool>> filter)
+        public virtual async Task<T> Get(Expression<Func<T, bool>> filter, bool track = true, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = dbSet;
             query = query.Where(filter);
-            return await query.FirstOrDefaultAsync();
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            if (track)
+            {
+                return await query.FirstOrDefaultAsync();
+            }
+            else
+            {
+                return await query.AsNoTracking().FirstOrDefaultAsync();
+            }
         }
 
-        public async Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter)
+        public async Task<IEnumerable<T>> GetMultiple(Expression<Func<T, bool>> filter, params Expression<Func<T, object>>[] includes)
         {
-            var list = await dbSet.Where(filter).ToListAsync();
-            return list;
+            var list = dbSet.Where(filter);
+            foreach (var include in includes)
+            {
+                list = list.Include(include);
+            }
+            return await list.ToListAsync();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAll(params Expression<Func<T, object>>[] includes)
         {
-            return await dbSet.ToListAsync();
+            var query = dbSet.AsQueryable();
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.AsNoTracking().ToListAsync();
+
+
         }
 
         public virtual bool Remove(int id)

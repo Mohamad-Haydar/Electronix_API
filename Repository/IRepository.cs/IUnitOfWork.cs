@@ -11,6 +11,8 @@ namespace Web_API.Repository.IRepository
         IProductOptionVariantRepository ProductOptionVariant { get; }
         IUserRepository User { get; }
         IUserProductReviewRepository UserProductReview { get; }
+        IDashboardUserRepository DashboardUser { get; }
+        IProductsRequestsRepository ProductsRequests { get; }
         void Save();
     }
 }

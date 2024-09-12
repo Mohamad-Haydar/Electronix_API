@@ -3,30 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Web_API.Models;
-using Web_API.Models.DTO.Request;
-using Web_API.Repository;
-using Web_API.Repository.IRepository;
 namespace Web_API.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            try
-            {
-                var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
-                if (databaseCreator != null)
-                {
-                    if (!databaseCreator.CanConnect()) databaseCreator.Create();
-                    if (!databaseCreator.HasTables()) databaseCreator.CreateTables();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            Database.Migrate();
         }
         public override DbSet<User> Users { get; set; }
+        public DbSet<DashbordUser> DashbordUsers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<UserProductReview> UserProductReviews { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -35,6 +21,7 @@ namespace Web_API.Data
         public DbSet<Option> Options { get; set; }
         public DbSet<ProductOption> ProductOptions { get; set; }
         public DbSet<ProductOptionVariant> ProductOptionVariantS { get; set; }
+        public DbSet<ProductsRequests> ProductsRequests { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -42,6 +29,7 @@ namespace Web_API.Data
             base.OnModelCreating(builder);
 
             builder.Entity<User>().HasKey(u => u.Id);
+            builder.Entity<DashbordUser>().HasKey(du => du.Id);
             // builder.Entity<Role>().HasKey(r => r.Id);
             builder.Entity<Product>().HasKey(p => p.Id);
             builder.Entity<Category>().HasKey(c => c.Id);
@@ -51,6 +39,7 @@ namespace Web_API.Data
             builder.Entity<ProductOption>().HasKey(po => po.Id);
             builder.Entity<ProductOptionVariant>().HasKey(pov => pov.Id);
             builder.Entity<RefreshToken>().HasKey(rt => rt.Id);
+            builder.Entity<ProductsRequests>().HasKey(pr => pr.Id);
 
             // user with product relation: user product review relation N-M
             builder.Entity<UserProductReview>().HasKey(upr => upr.Id);
@@ -76,7 +65,8 @@ namespace Web_API.Data
             builder.Entity<ProductOptionVariant>().HasOne(pov => pov.ProductOption).WithMany(po => po.ProductOptionVariants).HasForeignKey(pov => pov.ProductOptionId).OnDelete(DeleteBehavior.NoAction);
 
             // refresh token relation with the user
-            builder.Entity<User>().HasOne(u => u.RefreshToken).WithOne(rt => rt.User).HasForeignKey<RefreshToken>(rt => rt.UserId);
+            builder.Entity<User>().HasOne(u => u.RefreshToken).WithOne(rt => rt.User).HasForeignKey<RefreshToken>(rt => rt.UserId).OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<User>().HasOne(u => u.DashbordUser).WithOne(rt => rt.User).HasForeignKey<DashbordUser>(rt => rt.UserId).OnDelete(DeleteBehavior.Cascade);
 
             // builder.Entity<Category>().HasData(
             //     new { ID = "1", CategoryName = "Phone" }

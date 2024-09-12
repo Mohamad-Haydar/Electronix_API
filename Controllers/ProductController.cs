@@ -1,15 +1,20 @@
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Web_API.Models;
 using Web_API.Models.DTO.Request;
 using Web_API.Models.DTO.Responce;
 using Web_API.Repository.IRepository;
+using Web_API.Repository;
+using Web_API.Data;
 
 namespace Web_API.Controllers
 {
@@ -20,79 +25,80 @@ namespace Web_API.Controllers
     private readonly ILogger<ProductController> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-
-    public ProductController(ILogger<ProductController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+    private readonly ApplicationDbContext _db;
+    public ProductController(ILogger<ProductController> logger, IUnitOfWork unitOfWork, IMapper mapper, ApplicationDbContext db)
     {
       _logger = logger;
       _unitOfWork = unitOfWork;
       _mapper = mapper;
+      _db = db;
     }
 
     #region Get Region
 
     [HttpGet("GetAllProducts")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllProducts()
     {
-      var products = await _unitOfWork.Product.GetAll();
-      List<ProductSummaryVM> psvm = new();
-      foreach (var item in products)
-      {
-        var man = await _unitOfWork.Manufacturer.Get(x => x.Id == item.ManufacturerId);
-        psvm.Add(new()
-        {
-          Id = item.Id,
-          Title = item.Title,
-          Description = item.Description,
-          Discount = item.Discount,
-          ManufacturerId = item.ManufacturerId,
-          ManufacturerName = man.ManufacturerName,
-          // ImageUrl  = item.ImageUrl,
-          NummberOfReview = item.NummberOfReview,
-          Review = item.Review,
-        });
-      }
-      return Ok(psvm);
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetAll(x => x.Manufacturer, y => y.Category));
+      return Ok(products);
     }
 
+
     [HttpGet("GetProductsOfCategory")]
-    public async Task<IActionResult> GetProductsOfCategory(string catName)
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProductsOfCategory([Required] string catName)
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.Category.CategoryName.ToLower() == catName.ToLower()));
-      List<ProductSummaryVM> psvm = new();
-      foreach (var item in products)
+      if (!ModelState.IsValid)
       {
-        var man = await _unitOfWork.Manufacturer.Get(x => x.Id == item.ManufacturerId);
-        psvm.Add(new()
-        {
-          Id = item.Id,
-          Title = item.Title,
-          Description = item.Description,
-          Discount = item.Discount,
-          ManufacturerId = item.ManufacturerId,
-          ManufacturerName = man.ManufacturerName,
-          // ImageUrl  = item.ImageUrl,
-          NummberOfReview = item.NummberOfReview,
-          Review = item.Review,
-        });
+        return BadRequest(new { status = "error", message = "Please fill all the necessary information" });
       }
-      return Ok(psvm);
+      var products = _mapper.Map<List<ProductSummaryVM>>(
+        await _unitOfWork.Product.GetMultiple(x => x.Category.CategoryName.ToLower() == catName.ToLower(),
+        M => M.Manufacturer, C => C.Category
+      ));
+      return Ok(products);
     }
 
     [HttpGet("GetProductsOfManufacturer")]
-    public async Task<IActionResult> GetProductsOfManufacturer(int id)
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProductsOfManufacturer([Required] int id)
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetMultiple(x => x.ManufacturerId == id));
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(new { status = "error", message = "Please fill all the necessary information" });
+      }
+      var manufacturer = await _unitOfWork.Manufacturer.Get(x => x.Id == id);
+      if (manufacturer == null)
+      {
+        return NotFound(new { status = "error", message = "Manufacturer Not Found" });
+      }
+      var products = _mapper.Map<List<ProductSummaryVM>>(
+        await _unitOfWork.Product.GetMultiple(x => x.ManufacturerId == id,
+        M => M.Manufacturer, C => C.Category
+      ));
       return Ok(products);
     }
 
     [HttpGet("GetOneProduct")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOneProduct(string id)
     {
       if (!ModelState.IsValid)
-        return BadRequest();
-      var product = await _unitOfWork.Product.GetProduct(id);
+      {
+        return BadRequest(new { status = "error", message = "Please fill all the necessary information" });
+      }
+      var product = await _unitOfWork.Product.Get(x => x.Id == id);
       if (product == null)
-        return NotFound();
+        return NotFound(new { status = "error", message = "Product Not Found" });
 
       var manufacturer = await _unitOfWork.Manufacturer.Get(x => x.Id == product.ManufacturerId);
       var category = await _unitOfWork.Category.Get(x => x.Id == product.CategoryId);
@@ -104,13 +110,13 @@ namespace Web_API.Controllers
         Specification = product.Specification,
         Barcode = product.Barcode,
         Discount = product.Discount,
-        // ImageUrl = product.ImageUrl,
+        ImageUrl = product.ImageUrl,
         NummberOfReview = product.NummberOfReview,
         Review = product.Review,
-        Manufacturer = manufacturer.ManufacturerName,
+        ManufacturerName = manufacturer.ManufacturerName,
         ManufacturerId = product.ManufacturerId,
         CategoryId = product.CategoryId,
-        Category = category.CategoryName,
+        CategoryName = category.CategoryName,
         Stars5 = product.Stars5,
         Stars4 = product.Stars4,
         Stars3 = product.Stars3,
@@ -151,16 +157,22 @@ namespace Web_API.Controllers
     }
 
     [HttpGet("GetLast10Item")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetLast10Item()
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetLatest(10));
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetLatest(10, x => x.Category, x => x.Manufacturer));
       return Ok(products);
     }
 
     [HttpGet("GetSpecialOffer")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSpecialOffer()
     {
-      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetSpecialOffer(10));
+      var products = _mapper.Map<List<ProductSummaryVM>>(await _unitOfWork.Product.GetSpecialOffer(10, x => x.Category, x => x.Manufacturer));
       return Ok(products);
     }
 
@@ -169,7 +181,7 @@ namespace Web_API.Controllers
     #region  Update Region
 
     [HttpPatch("UpdateProduct")]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
     public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductVM updateProductVM, string id)
     {
       if (updateProductVM.Id != id)
@@ -185,7 +197,7 @@ namespace Web_API.Controllers
         });
       }
 
-      var product = await _unitOfWork.Product.GetProduct(id);
+      var product = await _unitOfWork.Product.Get(x => x.Id == id);
 
       if (product == null)
       {
@@ -216,8 +228,15 @@ namespace Web_API.Controllers
       _unitOfWork.ProductVariant.Remove(id);
       _unitOfWork.ProductOption.Remove(id);
 
+      var op = await _unitOfWork.Option.GetAll();
+      var options = new Dictionary<string, int>();
+      foreach (var item in op)
+      {
+        options.Add(item.OptionName, item.Id);
+      }
+
       // create new product variations
-      var res = CreateVariation(updateProductVM.ProductVariantsVMs, product.Id);
+      var res = CreateVariation(updateProductVM.ProductVariantsVMs, product.Id, options);
       if (res == null)
       {
         return BadRequest(new { status = "success", message = "there where an error while creating variatin, please try again" });
@@ -233,7 +252,7 @@ namespace Web_API.Controllers
     #region  Post Region
 
     [HttpPost("CreateProduct")]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
     public async Task<IActionResult> CreateProduct([FromBody] AddProductVM ProductVM)
     {
       if (!ModelState.IsValid)
@@ -244,7 +263,7 @@ namespace Web_API.Controllers
           Success = false
         });
       }
-      var existingProduct = await _unitOfWork.Product.Get(x => x.Barcode == ProductVM.Barcode || x.Title == ProductVM.Title);
+      var existingProduct = await _unitOfWork.Product.Get(x => x.Barcode == ProductVM.Barcode || x.Title == ProductVM.Title, false);
       if (existingProduct != null)
       {
         return BadRequest(new
@@ -253,7 +272,15 @@ namespace Web_API.Controllers
           Success = false
         });
       }
-      var res = await Createproduct(ProductVM);
+
+      var op = await _unitOfWork.Option.GetAll();
+      var options = new Dictionary<string, int>();
+      foreach (var item in op)
+      {
+        options.Add(item.OptionName, item.Id);
+      }
+
+      var res = await Createproduct(ProductVM, options);
       if (res)
       {
         _unitOfWork.Save();
@@ -264,6 +291,7 @@ namespace Web_API.Controllers
     }
 
     [HttpPost("SeedProducts")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
     public async Task<IActionResult> SeedProducts([FromForm] IFormFile file)
     {
       if (file == null || file.Length == 0)
@@ -272,6 +300,14 @@ namespace Web_API.Controllers
       // Ensure the uploaded file is an image (optional)
       if (file.ContentType.ToLower() != "application/json")
         return BadRequest("Invalid file type. Please upload Json file");
+
+
+      var op = await _unitOfWork.Option.GetAll();
+      var options = new Dictionary<string, int>();
+      foreach (var item in op)
+      {
+        options.Add(item.OptionName, item.Id);
+      }
 
       // Read the content of the JSON file
       using (var streamReader = new StreamReader(file.OpenReadStream()))
@@ -282,7 +318,7 @@ namespace Web_API.Controllers
           var jsonObject = JsonConvert.DeserializeObject<List<AddProductVM>>(jsonContent);
           foreach (var item in jsonObject)
           {
-            var res = await Createproduct(item);
+            var res = await Createproduct(item, options);
             if (!res)
             {
               return BadRequest();
@@ -370,14 +406,14 @@ namespace Web_API.Controllers
 
     #region Delete Region
     [HttpDelete("DeleteProduct")]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
     public async Task<IActionResult> DeleteProduct(string Id)
     {
       if (!ModelState.IsValid)
       {
         return BadRequest(new { status = "error", message = "Please enter an ID of a product to make the remove" });
       }
-      var product = await _unitOfWork.Product.GetProduct(Id);
+      var product = await _unitOfWork.Product.Get(x => x.Id == Id);
       if (product == null)
       {
         return BadRequest(new { status = "error", message = "product don't exists" });
@@ -386,12 +422,14 @@ namespace Web_API.Controllers
       _unitOfWork.Product.Remove(product);
       _unitOfWork.Save();
 
-      return Ok();
+      return Ok(new { status = "success", message = "Product deleted successfully" });
     }
 
     #endregion
-    private async Task<bool> CreateVariation(ICollection<ProductVariantsVM> productVariantsVMs, string id)
+    private async Task<bool> CreateVariation(ICollection<ProductVariantsVM> productVariantsVMs, string id, Dictionary<string, int> options)
     {
+
+      // var option = await _unitOfWork.Option.GetAll();
 
       foreach (var item in productVariantsVMs)
       {
@@ -412,22 +450,34 @@ namespace Web_API.Controllers
         {
           foreach (var OV in item.OptionsValues)
           {
-            string poId = Guid.NewGuid().ToString();
-            ProductOption productOption = new()
+            try
             {
-              Id = poId,
-              ProductId = id,
-              OptionId = (int)OV.Key
-            };
+              string poId = Guid.NewGuid().ToString();
+              // var singleOptoin = option.FirstOrDefault(x => x.OptionName == OV.Key).Id;
+              ProductOption productOption = new()
+              {
+                Id = poId,
+                ProductId = id,
+                // OptionId = OV.Key == "ramStorage" ? 1 : 2
+                OptionId = options[OV.Key]
+              };
 
-            ProductOptionVariant productOptionVariant = new()
+              ProductOptionVariant productOptionVariant = new()
+              {
+                ProductOptionId = poId,
+                ProductVariantId = pvId,
+                Value = OV.Value
+              };
+              await _unitOfWork.ProductOption.Add(productOption);
+              await _unitOfWork.ProductOptionVariant.Add(productOptionVariant);
+            }
+            catch (Exception ex)
             {
-              ProductOptionId = poId,
-              ProductVariantId = pvId,
-              Value = OV.Value
-            };
-            await _unitOfWork.ProductOption.Add(productOption);
-            await _unitOfWork.ProductOptionVariant.Add(productOptionVariant);
+              // Log or handle the exception as needed
+              Console.WriteLine($"An error occurred in the loop: {ex.Message}");
+              // You might want to rethrow the exception if you want to stop processing after an error
+              // throw;
+            }
           }
         }
         else
@@ -439,7 +489,7 @@ namespace Web_API.Controllers
       return true;
     }
 
-    private async Task<bool> Createproduct(AddProductVM ProductVM)
+    private async Task<bool> Createproduct(AddProductVM ProductVM, Dictionary<string, int> options)
     {
       // create a new product
       Product product = new()
@@ -464,11 +514,11 @@ namespace Web_API.Controllers
         Stars5 = ProductVM.Star5,
       };
 
-      await _unitOfWork.Product.Add(product);
+      var result = await _unitOfWork.Product.Add(product);
 
-      if (ProductVM.ProductVariantsVMs != null)
+      if (result && ProductVM.ProductVariantsVMs != null)
       {
-        var res = CreateVariation(ProductVM.ProductVariantsVMs, product.Id);
+        var res = CreateVariation(ProductVM.ProductVariantsVMs, product.Id, options);
         if (res == null)
         {
           return false;
@@ -478,6 +528,21 @@ namespace Web_API.Controllers
       }
       return false;
     }
+
+
+    #region EntitiesAproach
+
+    // [HttpGet("productEntity")]
+    // public async Task<IActionResult> GetOneEntity(string id)
+    // {
+
+    //   var productTask = await _db.Products.ToModelAsync();
+
+    //   return Ok(productTask);
+    // }
+
+    #endregion
+
 
   }
 }

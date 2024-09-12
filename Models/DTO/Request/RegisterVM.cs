@@ -1,6 +1,5 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Web_API.Models.DTO.Request
 {
@@ -22,6 +21,12 @@ namespace Web_API.Models.DTO.Request
         public string PhoneNumber { get; set; }
         [Required]
         public string Country { get; set; }
+        [ValidateNever]
+        public string ZipCode { get; set; }
+        [ValidateNever]
+        public string City { get; set; }
+        [ValidateNever]
+        public string Adress { get; set; }
 
     }
 }

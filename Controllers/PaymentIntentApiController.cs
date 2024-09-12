@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -15,7 +16,7 @@ namespace Web_API.Controllers
     [ApiController]
     [Route("api/create-payment-intent")]
     // [ApiExplorerSettings(IgnoreApi = true)]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "client")]
     public class PaymentIntentApiController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -35,6 +36,7 @@ namespace Web_API.Controllers
             {
                 return BadRequest();
             }
+
             var paymentIntentService = new PaymentIntentService();
 
             var paymentIntent = paymentIntentService.Create(new PaymentIntentCreateOptions
@@ -46,6 +48,22 @@ namespace Web_API.Controllers
                     Enabled = true,
                 },
             });
+
+            List<ProductsRequests> productsRequests = new();
+
+            foreach (var product in products)
+            {
+                var variation = await _unitOfWork.ProductVariant.Get(x => x.Id == product.ProductVariantId, includes: x => x.Product);
+                productsRequests.Add(new()
+                {
+                    PaymentSecret = paymentIntent.ClientSecret,
+                    ImageUrl = variation.Product.ImageUrl,
+                    sku = variation.sku,
+                    Qty = product.Qty,
+                    TotalPrice = amount,
+                    PaymentComplete = false,
+                });
+            }
 
             return Json(new { clientSecret = paymentIntent.ClientSecret });
         }
@@ -82,6 +100,29 @@ namespace Web_API.Controllers
             _unitOfWork.Save();
             return amount;
         }
+
+
+        [HttpPost("completePayment")]
+        public async Task<IActionResult> CompletePayment([Required] string PaymentSecret)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { status = "error", message = "you should enter the payment secret" });
+            }
+
+            var products = await _unitOfWork.ProductsRequests.GetMultiple(x => x.PaymentSecret == PaymentSecret);
+
+            foreach (var product in products)
+            {
+                product.PaymentComplete = true;
+            }
+
+            _unitOfWork.Save();
+
+            return Ok();
+
+        }
+
 
         private async Task<bool> ReduceProductFromDb(List<CheckoutProductVM> products)
         {

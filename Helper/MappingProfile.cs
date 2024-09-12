@@ -9,8 +9,16 @@ namespace Web_API.Helper
     {
         public MappingProfile()
         {
-            CreateMap<Product, ProductSummaryVM>();
+            CreateMap<Manufacturer, ProductSummaryVM>();
+            CreateMap<Category, ProductSummaryVM>();
+
+            CreateMap<Product, ProductSummaryVM>().IncludeMembers(src => src.Category, m => m.Manufacturer);
+
+
             CreateMap<User, RegisterVM>();
+            CreateMap<User, DashboardUsersVM>();
+            CreateMap<DashbordUser, DashboardUsersVM>().IncludeMembers(src => src.User);
+            CreateMap<User, ClientVM>();
         }
     }
 }

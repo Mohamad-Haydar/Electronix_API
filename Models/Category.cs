@@ -9,6 +9,7 @@ namespace Web_API.Models
         [Key]
         public int Id { get; set; }
         public string CategoryName { get; set; }
+        public string ImgeUrl { get; set; }
         [ValidateNever]
         public ICollection<Product> Products { get; set; }
     }

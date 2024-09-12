@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Web_API.Models
 {
@@ -9,5 +7,6 @@ namespace Web_API.Models
         public string Country { get; set; }
         public ICollection<UserProductReview> UserProductReviews { get; set; }
         public RefreshToken RefreshToken { get; set; }
+        public virtual DashbordUser DashbordUser { get; set; }
     }
 }

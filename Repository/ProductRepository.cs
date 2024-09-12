@@ -1,8 +1,10 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_API.Data;
 using Web_API.Models;
 using Web_API.Models.DTO.Request;
+using Web_API.Models.DTO.Responce;
 using Web_API.Repository.IRepository;
 
 namespace Web_API.Repository
@@ -22,11 +24,6 @@ namespace Web_API.Repository
         {
             await dbSet.AddAsync(product);
             return true;
-        }
-
-        public override async Task<IEnumerable<Product>> GetAll()
-        {
-            return await dbSet.ToListAsync();
         }
 
         public async Task AddProductRange(List<AddProductVM> products)
@@ -70,11 +67,12 @@ namespace Web_API.Repository
                     foreach (var OV in item.OptionsValues)
                     {
                         string poId = Guid.NewGuid().ToString();
+                        var option = await _db.Options.FirstOrDefaultAsync(x => x.OptionName == OV.Key);
                         ProductOption productOption = new()
                         {
                             Id = poId,
                             ProductId = product.Id,
-                            OptionId = (int)OV.Key
+                            OptionId = option.Id
                         };
 
                         ProductOptionVariant productOptionVariant = new()
@@ -92,20 +90,25 @@ namespace Web_API.Repository
 
         }
 
-        public async Task<IEnumerable<Product>> GetLatest(int number)
+        public async Task<IEnumerable<Product>> GetLatest(int number, params Expression<Func<Product, object>>[] includes)
         {
-            return await dbSet.OrderByDescending(p => p.AddedDate).Take(number).ToListAsync();
+            var products = dbSet.OrderByDescending(p => p.AddedDate).Take(number);
+            foreach (var include in includes)
+            {
+                products = products.Include(include);
+            }
+            return await products.ToListAsync();
         }
 
-        public async Task<Product> GetProduct(string id)
+        public async Task<IEnumerable<Product>> GetSpecialOffer(int number, params Expression<Func<Product, object>>[] includes)
         {
-            var product = await dbSet.Where(x => x.Id == id).FirstOrDefaultAsync();
-            return product;
+            var products = dbSet.Where(x => x.Discount != 0).OrderByDescending(p => p.AddedDate).Take(number);
+            foreach (var include in includes)
+            {
+                products = products.Include(include);
+            }
+            return await products.ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetSpecialOffer(int number)
-        {
-            return await dbSet.Where(x => x.Discount != 0).OrderByDescending(p => p.AddedDate).Take(number).ToListAsync();
-        }
     }
 }

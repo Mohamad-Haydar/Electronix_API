@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 namespace Web_API.Models
 {
@@ -16,6 +15,5 @@ namespace Web_API.Models
 
         [ForeignKey("UserId")]
         public User User { get; set; }
-
     }
 }

@@ -91,27 +91,27 @@ namespace Web_API
                                 Qty = 10,
                                 Sku = "sku1",
                                 Price = 210,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "8/128" },
-                                    { 2, "red" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "8/128" },
+                                    { "color", "red" }
                                 }
                             },
                              new(){
                                 Qty = 7,
                                 Sku = "sku2",
                                 Price = 220,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "8/128" },
-                                    { 2, "blue" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "8/128" },
+                                    { "color", "blue" }
                                 }
                             },
                             new(){
                                 Qty = 3,
                                 Sku = "sku2",
                                 Price = 250,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "8/256" },
-                                    { 2, "blue" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "8/256" },
+                                    { "color", "blue" }
                                 }
                             },
                         }
@@ -131,27 +131,27 @@ namespace Web_API
                                 Qty = 20,
                                 Sku = "sku4",
                                 Price = 1300,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "8/256" },
-                                    { 2, "silver" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "8/256" },
+                                    { "color", "silver" }
                                 }
                             },
                              new(){
                                 Qty = 30,
                                 Sku = "sku5",
                                 Price = 1500,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "8/512" },
-                                    { 2, "tetanium" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "8/512" },
+                                    { "color", "tetanium" }
                                 }
                             },
                             new(){
                                 Qty = 3,
                                 Sku = "sku6",
                                 Price = 250,
-                                OptionsValues = new Dictionary<int, string>() {
-                                    { 1, "10/512" },
-                                    { 2, "gold" }
+                                OptionsValues = new Dictionary<string, string>() {
+                                    { "ramStorage", "10/512" },
+                                    { "color", "gold" }
                                 }
                             },
                         }

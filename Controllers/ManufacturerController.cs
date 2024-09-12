@@ -8,7 +8,7 @@ namespace Web_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin,owner")]
     public class ManufacturerController : ControllerBase
     {
         private readonly ILogger<ManufacturerController> _logger;
@@ -21,6 +21,7 @@ namespace Web_API.Controllers
         }
 
         [HttpGet("GetAllManufacturer")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllManufacturer()
         {
             return Ok(await _unitOfWork.Manufacturer.GetAll());
@@ -29,9 +30,14 @@ namespace Web_API.Controllers
         [HttpPost("AddManufacturer")]
         public async Task<IActionResult> AddManufacturer([FromBody] Manufacturer Manufacturer)
         {
+            var existsCategory = await _unitOfWork.Manufacturer.Get(x => x.ManufacturerName == Manufacturer.ManufacturerName);
+            if (existsCategory != null)
+            {
+                return BadRequest(new { status = "error", message = "Manufacturer already exists" });
+            }
             await _unitOfWork.Manufacturer.Add(Manufacturer);
             _unitOfWork.Save();
-            return Ok();
+            return Ok(new { status = "success", message = "Manufacturer added successfully" });
         }
 
         [HttpPatch("UpdateManufacturer")]
@@ -52,10 +58,16 @@ namespace Web_API.Controllers
             {
                 return BadRequest(new { status = "error", message = "Manufacturer don't exists" });
             }
+
+            var existsCategory = await _unitOfWork.Manufacturer.Get(x => x.ManufacturerName == Manufacturer.ManufacturerName);
+            if (existsCategory != null)
+            {
+                return BadRequest(new { status = "error", message = "Manufacturer already exists" });
+            }
             manufacturer.ManufacturerName = Manufacturer.ManufacturerName;
             _unitOfWork.Manufacturer.Update(manufacturer);
             _unitOfWork.Save();
-            return Ok();
+            return Ok(new { status = "success", message = "Manufacturer updated successfully" });
         }
 
         [HttpDelete("DeleteManufacturer")]
@@ -71,9 +83,15 @@ namespace Web_API.Controllers
                 return BadRequest(new { status = "error", message = "Manufacturer don't exists" });
             }
 
+            var manufacturerName = await _unitOfWork.Manufacturer.Get(x => x.Id == id);
+            if (manufacturerName == null)
+            {
+                return BadRequest(new { status = "error", message = "Manufacturer name already exists" });
+            }
+
             _unitOfWork.Manufacturer.Remove(manufacturer);
             _unitOfWork.Save();
-            return Ok();
+            return Ok(new { status = "success", message = "Manufacturer deleted successsfully" });
         }
 
 
