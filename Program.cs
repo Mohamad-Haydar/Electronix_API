@@ -12,8 +12,7 @@ using Microsoft.OpenApi.Models;
 using Web_API;
 using Stripe;
 using Web_API.Service;
-using System.Text.Json.Serialization;
-using AspNetCoreRateLimit;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,37 +52,21 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Configure rate limiting options
-// builder.Services.AddOptions();
-// builder.Services.AddMemoryCache();
-// builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
-// builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
-
-// // Add rate limiting Services
-// builder.Services.AddInMemoryRateLimiting();
-
-
-
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.TokenLifespan = TimeSpan.FromHours(10));
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-var server = Environment.GetEnvironmentVariable("DBServer") ?? "localhost";
-var database = Environment.GetEnvironmentVariable("Database") ?? "Electronix";
-var port = Environment.GetEnvironmentVariable("DBPort") ?? "1433";
-var user = Environment.GetEnvironmentVariable("DBUser") ?? "sa";
-var password = Environment.GetEnvironmentVariable("DBPassword") ?? "#@!76Mohamad612";
-var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
-// var ConnectionString = "Server=Electronix.mssql.somee.com;Database=Electronix;User=MohamadElectron_SQLLogin_1;Password=r47vitfn4r;TrustServerCertificate=True";
+// var ConnectionString = $"Server={server},{port};Database={database};User={user};Password={password};TrustServerCertificate=True";
+var ConnectionString = "workstation id=electronixDb.mssql.somee.com;packet size=4096;user id=Mohamad_SQLLogin_1;pwd=usjgwnfhbu;data source=electronixDb.mssql.somee.com;persist security info=False;initial catalog=electronixDb;TrustServerCertificate=True";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
+
 
 builder.Services.Configure<IdentityOptions>(options =>
     {
@@ -116,10 +99,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    // This lambda determines whether user consent for non-essential 
-    // cookies is needed for a given request.
     options.CheckConsentNeeded = context => true;
-
     options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
@@ -167,7 +147,19 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Log or handle migration errors as needed
+        Console.WriteLine("Migration failed: " + ex.Message);
+    }
+}
 
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
     SeedData(app);
@@ -196,7 +188,7 @@ app.UseCookiePolicy();
 app.UseRouting();
 
 app.UseCors("AllowLocalhost");
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -204,49 +196,3 @@ app.MapControllers();
 
 app.Run();
 
-// clear()
-// fetch("http://192.168.1.6:5148/api/user/login", {
-//     method: "POST",
-//     mode: "cors", 
-//     credentials: "include", 
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify({
-//       email: "ali@email.com",
-//       password: "Pass1234!"
-//     })
-//   }).then(res => res.json());
-
-// clear()
-
-// fetch("https://192.168.1.9:7278/api/user/login", {
-//     method: "POST",
-//     mode: "cors", 
-//     credentials: "include", 
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify({
-//       email: "owner@examlpe.com",
-//       password: "Pass1234!"
-//     })
-//   }).then(res => res.json());
-
-
-// fetch("https://192.168.1.9:7278/api/user/createadmin", {
-//     method: "POST",
-//     mode: "cors", 
-//     credentials: "include", 
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify({
-//       username: "Admin",
-//       email: "newAdmin@examlpe.com",
-//      	password: "Pass1234!",
-//       confirmPassword: "Pass1234!",
-//       phoneNumber: "string",
-//       country: "string"
-//     })
-//   }).then(res => res.json());

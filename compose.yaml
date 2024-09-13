@@ -28,7 +28,7 @@ services:
       - DBServer=db
       - DBPort=3001
       - DBPassword=#@!76Mohamad612
-      - Database=Electronix
+      - Database=electronixDb
       - DBUser=sa
     networks:
       - electronicapp

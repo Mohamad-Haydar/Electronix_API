@@ -4448,25 +4448,29 @@
     ]
   },
   "packageFolders": {
-    "/home/mohamad/.nuget/packages/": {}
+    "C:\\Users\\User\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/Web_API.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Source\\Repos\\Electronix_API\\Web_API.csproj",
       "projectName": "Web_API",
-      "projectPath": "/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/Web_API.csproj",
-      "packagesPath": "/home/mohamad/.nuget/packages/",
-      "outputPath": "/home/mohamad/Programming/dotnet/Electronix_Ecommerce_API/Web_API/obj/",
+      "projectPath": "C:\\Users\\User\\Source\\Repos\\Electronix_API\\Web_API.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\Source\\Repos\\Electronix_API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/mohamad/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
-        "https://api.nuget.org/v3/index.json": {}
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://www.myget.org/F/caliburn-micro-builds/api/v3/index.json": {}
       },
       "frameworks": {
         "net7.0": {
@@ -4563,20 +4567,6 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[7.0.17, 7.0.17]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Host.linux-x64",
-            "version": "[7.0.17, 7.0.17]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[7.0.17, 7.0.17]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -4585,7 +4575,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.203/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304\\RuntimeIdentifierGraph.json"
       }
     }
   }

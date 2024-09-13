@@ -1,0 +1,483 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAO9iRkW/GOE+2wfdaCqykMgAAAAACAAAAAAAQZgAAAAEAACAAAAAxCybW7pEpgiG8lw1xF6580fEoPZVYBBhEtGSIXzfdxwAAAAAOgAAAAAIAACAAAADJmee1JhpcyZcOMyzoqbZtpmBx6MzoB5qbNV1PIdZo2yAAAADWY7B/HNenw6FpnAyrt8HYpGCCg9+I3PA97Nvsvxi+/UAAAAA+qXcFBypxevIgdFQB87GbZFlmZZ9D0d9xibHqqxuIC40XG1jh65d8dVx9PVp+VYCgUZTXkDU7onvitQ4IeoDL</EncryptedPassword>
+    <_PublishTargetUrl>ftp://electronixapi.somee.com/www.electronixapi.somee.com</_PublishTargetUrl>
+    <History>True|2024-09-13T05:44:44.3534039Z||;True|2024-09-12T17:11:43.0137865+03:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="appsettings.Development.json">
+      <publishTime>09/12/2024 16:51:32</publishTime>
+    </File>
+    <File Include="appsettings.json">
+      <publishTime>09/12/2024 16:51:32</publishTime>
+    </File>
+    <File Include="AspNetCoreRateLimit.dll">
+      <publishTime>12/03/2022 19:20:48</publishTime>
+    </File>
+    <File Include="AutoMapper.dll">
+      <publishTime>01/16/2023 17:41:56</publishTime>
+    </File>
+    <File Include="AutoMapper.Extensions.Microsoft.DependencyInjection.dll">
+      <publishTime>04/09/2023 08:58:02</publishTime>
+    </File>
+    <File Include="Azure.Core.dll">
+      <publishTime>06/30/2022 22:28:36</publishTime>
+    </File>
+    <File Include="Azure.Identity.dll">
+      <publishTime>09/19/2022 23:31:34</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.Authentication.JwtBearer.dll">
+      <publishTime>10/20/2023 20:31:12</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.Cryptography.Internal.dll">
+      <publishTime>10/20/2023 20:28:42</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.Cryptography.KeyDerivation.dll">
+      <publishTime>10/20/2023 20:29:58</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll">
+      <publishTime>10/20/2023 20:30:18</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.Identity.UI.dll">
+      <publishTime>10/20/2023 20:31:24</publishTime>
+    </File>
+    <File Include="Microsoft.AspNetCore.OpenApi.dll">
+      <publishTime>10/20/2023 20:31:08</publishTime>
+    </File>
+    <File Include="Microsoft.Bcl.AsyncInterfaces.dll">
+      <publishTime>04/15/2020 01:39:12</publishTime>
+    </File>
+    <File Include="Microsoft.Data.SqlClient.dll">
+      <publishTime>03/28/2023 08:28:24</publishTime>
+    </File>
+    <File Include="Microsoft.Data.Sqlite.dll">
+      <publishTime>10/19/2023 03:10:10</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.Abstractions.dll">
+      <publishTime>10/19/2023 03:10:04</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.dll">
+      <publishTime>10/19/2023 03:10:20</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.Relational.dll">
+      <publishTime>10/19/2023 03:10:30</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.Sqlite.dll">
+      <publishTime>10/19/2023 03:10:42</publishTime>
+    </File>
+    <File Include="Microsoft.EntityFrameworkCore.SqlServer.dll">
+      <publishTime>10/19/2023 03:10:36</publishTime>
+    </File>
+    <File Include="Microsoft.Extensions.DependencyModel.dll">
+      <publishTime>10/18/2022 19:15:30</publishTime>
+    </File>
+    <File Include="Microsoft.Extensions.FileProviders.Embedded.dll">
+      <publishTime>10/20/2023 20:29:50</publishTime>
+    </File>
+    <File Include="Microsoft.Extensions.Identity.Core.dll">
+      <publishTime>10/20/2023 20:30:04</publishTime>
+    </File>
+    <File Include="Microsoft.Extensions.Identity.Stores.dll">
+      <publishTime>10/20/2023 20:30:12</publishTime>
+    </File>
+    <File Include="Microsoft.Extensions.Options.dll">
+      <publishTime>01/20/2023 01:54:36</publishTime>
+    </File>
+    <File Include="Microsoft.Identity.Client.dll">
+      <publishTime>10/03/2022 20:40:38</publishTime>
+    </File>
+    <File Include="Microsoft.Identity.Client.Extensions.Msal.dll">
+      <publishTime>11/20/2021 00:02:00</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.Abstractions.dll">
+      <publishTime>10/13/2022 22:42:54</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.JsonWebTokens.dll">
+      <publishTime>10/13/2022 22:20:20</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.Logging.dll">
+      <publishTime>10/13/2022 22:22:04</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.Protocols.dll">
+      <publishTime>10/13/2022 22:24:18</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.Protocols.OpenIdConnect.dll">
+      <publishTime>10/13/2022 22:34:00</publishTime>
+    </File>
+    <File Include="Microsoft.IdentityModel.Tokens.dll">
+      <publishTime>10/13/2022 22:29:00</publishTime>
+    </File>
+    <File Include="Microsoft.OpenApi.dll">
+      <publishTime>09/26/2022 15:32:38</publishTime>
+    </File>
+    <File Include="Microsoft.SqlServer.Server.dll">
+      <publishTime>01/27/2022 19:19:08</publishTime>
+    </File>
+    <File Include="Microsoft.Win32.SystemEvents.dll">
+      <publishTime>10/23/2021 02:40:24</publishTime>
+    </File>
+    <File Include="Newtonsoft.Json.dll">
+      <publishTime>11/24/2022 04:10:26</publishTime>
+    </File>
+    <File Include="runtimes/alpine-arm/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/alpine-arm64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/alpine-x64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/browser-wasm/nativeassets/net7.0/e_sqlite3.a">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-arm/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/linux-arm64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/linux-armel/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/linux-mips64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/linux-musl-arm/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-musl-arm64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:38</publishTime>
+    </File>
+    <File Include="runtimes/linux-musl-x64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-ppc64le/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-s390x/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-x64/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/linux-x86/native/libe_sqlite3.so">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/maccatalyst-arm64/native/libe_sqlite3.dylib">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/maccatalyst-x64/native/libe_sqlite3.dylib">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/osx-arm64/native/libe_sqlite3.dylib">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/osx-x64/native/libe_sqlite3.dylib">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/unix/lib/net6.0/Microsoft.Data.SqlClient.dll">
+      <publishTime>03/28/2023 08:28:24</publishTime>
+    </File>
+    <File Include="runtimes/unix/lib/net6.0/System.Drawing.Common.dll">
+      <publishTime>10/23/2021 02:51:42</publishTime>
+    </File>
+    <File Include="runtimes/win-arm/native/e_sqlite3.dll">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/win-arm/native/Microsoft.Data.SqlClient.SNI.dll">
+      <publishTime>01/13/2023 00:19:36</publishTime>
+    </File>
+    <File Include="runtimes/win-arm64/native/e_sqlite3.dll">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/win-arm64/native/Microsoft.Data.SqlClient.SNI.dll">
+      <publishTime>01/13/2023 00:19:36</publishTime>
+    </File>
+    <File Include="runtimes/win-x64/native/e_sqlite3.dll">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/win-x64/native/Microsoft.Data.SqlClient.SNI.dll">
+      <publishTime>01/13/2023 00:19:36</publishTime>
+    </File>
+    <File Include="runtimes/win-x86/native/e_sqlite3.dll">
+      <publishTime>01/10/2023 22:13:40</publishTime>
+    </File>
+    <File Include="runtimes/win-x86/native/Microsoft.Data.SqlClient.SNI.dll">
+      <publishTime>01/13/2023 00:19:36</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/Microsoft.Data.SqlClient.dll">
+      <publishTime>03/28/2023 08:27:58</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll">
+      <publishTime>10/23/2021 02:40:18</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/System.Drawing.Common.dll">
+      <publishTime>10/23/2021 02:48:10</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/System.Runtime.Caching.dll">
+      <publishTime>10/23/2021 02:52:44</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll">
+      <publishTime>10/23/2021 02:51:04</publishTime>
+    </File>
+    <File Include="runtimes/win/lib/net6.0/System.Windows.Extensions.dll">
+      <publishTime>10/23/2021 02:49:58</publishTime>
+    </File>
+    <File Include="SendGrid.dll">
+      <publishTime>08/10/2022 21:42:06</publishTime>
+    </File>
+    <File Include="SQLitePCLRaw.batteries_v2.dll">
+      <publishTime>01/10/2023 22:21:34</publishTime>
+    </File>
+    <File Include="SQLitePCLRaw.core.dll">
+      <publishTime>01/10/2023 22:18:32</publishTime>
+    </File>
+    <File Include="SQLitePCLRaw.provider.e_sqlite3.dll">
+      <publishTime>01/10/2023 22:18:52</publishTime>
+    </File>
+    <File Include="StarkbankEcdsa.dll">
+      <publishTime>11/09/2021 23:27:58</publishTime>
+    </File>
+    <File Include="Stripe.net.dll">
+      <publishTime>10/16/2023 23:29:00</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.Swagger.dll">
+      <publishTime>01/11/2023 08:48:22</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.SwaggerGen.dll">
+      <publishTime>01/11/2023 08:48:26</publishTime>
+    </File>
+    <File Include="Swashbuckle.AspNetCore.SwaggerUI.dll">
+      <publishTime>01/11/2023 08:49:02</publishTime>
+    </File>
+    <File Include="System.Configuration.ConfigurationManager.dll">
+      <publishTime>08/19/2022 22:58:02</publishTime>
+    </File>
+    <File Include="System.Drawing.Common.dll">
+      <publishTime>10/23/2021 02:49:12</publishTime>
+    </File>
+    <File Include="System.IdentityModel.Tokens.Jwt.dll">
+      <publishTime>10/13/2022 22:18:58</publishTime>
+    </File>
+    <File Include="System.Memory.Data.dll">
+      <publishTime>04/08/2021 19:45:54</publishTime>
+    </File>
+    <File Include="System.Runtime.Caching.dll">
+      <publishTime>10/23/2021 02:52:02</publishTime>
+    </File>
+    <File Include="System.Security.Cryptography.ProtectedData.dll">
+      <publishTime>10/23/2021 02:51:04</publishTime>
+    </File>
+    <File Include="System.Security.Permissions.dll">
+      <publishTime>10/23/2021 02:49:50</publishTime>
+    </File>
+    <File Include="System.Windows.Extensions.dll">
+      <publishTime>10/23/2021 02:49:44</publishTime>
+    </File>
+    <File Include="web.config">
+      <publishTime>09/13/2024 08:42:35</publishTime>
+    </File>
+    <File Include="Web_API.deps.json">
+      <publishTime>09/13/2024 08:42:34</publishTime>
+    </File>
+    <File Include="Web_API.dll">
+      <publishTime>09/13/2024 08:42:17</publishTime>
+    </File>
+    <File Include="Web_API.exe">
+      <publishTime>09/13/2024 08:42:17</publishTime>
+    </File>
+    <File Include="Web_API.pdb">
+      <publishTime>09/13/2024 08:42:17</publishTime>
+    </File>
+    <File Include="Web_API.runtimeconfig.json">
+      <publishTime>09/13/2024 08:42:17</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/css/site.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/favicon.ico">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/js/site.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.rtl.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.rtl.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.rtl.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.rtl.min.css">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/css/bootstrap.rtl.min.css.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.bundle.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.bundle.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.esm.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.esm.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.esm.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.esm.min.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/dist/js/bootstrap.min.js.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/bootstrap/LICENSE">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation-unobtrusive/LICENSE.txt">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation/dist/additional-methods.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation/dist/additional-methods.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation/dist/jquery.validate.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation/dist/jquery.validate.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery-validation/LICENSE.md">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery/dist/jquery.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery/dist/jquery.min.js">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery/dist/jquery.min.map">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+    <File Include="wwwroot/Identity/lib/jquery/LICENSE.txt">
+      <publishTime>10/20/2023 20:12:50</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
